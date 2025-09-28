@@ -164,11 +164,13 @@ src/
 This project prioritizes functionality and learning objectives over perfect code quality. The following technical debt items are documented for future improvement:
 
 ### ESLint Issues
+
 - **YouTube API Types**: Using `any` types for YouTube Iframe API (lines 27, 73, 77, 86, 245 in `YouTubePlayer.tsx`)
 - **Unused Variables**: Several unused imports and variables across components
 - **Missing Dependencies**: Some `useEffect` hooks missing dependency arrays
 
 ### Quick Fixes Available
+
 ```bash
 # These issues can be resolved by:
 # 1. Installing YouTube types: npm install --save-dev @types/youtube
@@ -177,11 +179,12 @@ This project prioritizes functionality and learning objectives over perfect code
 ```
 
 ### Trade-offs Made
+
 - **Deployment Speed** over **Perfect Typing** - Prioritized getting to production
 - **Feature Completion** over **Code Perfection** - Focused on demonstrating full-stack skills
 - **Working Software** over **Zero Technical Debt** - Pragmatic approach to development
 
-*Note: All functionality works correctly despite these linting warnings.*
+_Note: All functionality works correctly despite these linting warnings._
 
 ## 🤝 Contributing
 
