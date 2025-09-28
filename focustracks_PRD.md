@@ -140,8 +140,8 @@ To create a minimal viable product that demonstrates expertise in React, Next.js
 
 ### 5.1 Technology Stack
 
-- **Frontend**: React 18, Next.js 14, TypeScript
-- **Styling**: Tailwind CSS
+- **Frontend**: React 19.1, Next.js 15.5, TypeScript 5
+- **Styling**: Tailwind CSS v4
 - **Backend**: Node.js, Express.js
 - **Database**: Supabase (PostgreSQL)
 - **Authentication**: Supabase Auth
@@ -284,8 +284,8 @@ playlist_tracks (
 
 ### 8.3 Learning Objectives
 
-- **React Mastery**: Proper use of hooks, context, and component patterns
-- **Next.js Features**: App router, API routes, and SSR implementation
+- **React 19 Mastery**: Proper use of hooks, context, and component patterns
+- **Next.js 15 Features**: App router, API routes, Turbopack, and SSR implementation
 - **Database Integration**: Successful Supabase integration and queries
 - **Full-Stack Flow**: Complete data flow from frontend to backend
 

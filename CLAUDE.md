@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 FocusTracks is a music discovery and playlist application built as a technical learning project. The primary purpose is to demonstrate proficiency with modern web technologies while creating a functional music platform for focus and productivity tracks.
 
-**Key Technologies**: React 18, Next.js 15, TypeScript, Tailwind CSS, Supabase, Node.js
+**Key Technologies**: React 19.1, Next.js 15.5, TypeScript 5, Tailwind CSS v4, Supabase 2.57, Node.js
 
 ## Development Commands
 
@@ -78,8 +78,10 @@ All components have access to:
 
 ## Styling System
 
-- **Tailwind CSS v4** - Utility-first CSS framework
-- **Dark Mode**: Automatic theme switching based on user preference
+- **Tailwind CSS v4** - Utility-first CSS framework with new @variant syntax
+- **Dark Mode Configuration**: Uses `@variant dark (.dark &);` in globals.css
+- **No Config File**: Tailwind v4 uses CSS-based configuration, not tailwind.config.js
+- **Theme Switching**: Automatic theme switching based on user preference
 - **Responsive Design**: Mobile-first approach with responsive breakpoints
 - **Theme Classes**: Uses `.light` and `.dark` classes on document root
 
@@ -89,6 +91,29 @@ All components have access to:
 2. Auth state managed in `AuthContext` with real-time updates
 3. Protected routes check authentication status
 4. Session persistence handled automatically by Supabase
+
+## Version Checking Protocol
+
+**CRITICAL**: Before starting any new feature or making architectural changes, ALWAYS check current versions of key technologies:
+
+```bash
+# Check package.json for current versions
+cat package.json | grep -E "(react|next|typescript|tailwindcss|@supabase)"
+
+# Verify Node.js version
+node --version
+
+# Check specific framework configurations
+# - Tailwind v4 uses CSS-based config, not tailwind.config.js
+# - Next.js 15+ uses Turbopack by default
+# - React 19+ has updated types and behavior
+```
+
+**Key Version-Specific Considerations:**
+- **Tailwind CSS v4**: Uses `@variant` syntax in CSS, no config file needed
+- **Next.js 15**: App Router is default, Turbopack enabled
+- **React 19**: Updated TypeScript types, new hooks behavior
+- **TypeScript 5**: New features and stricter type checking
 
 ## Development Guidelines
 
