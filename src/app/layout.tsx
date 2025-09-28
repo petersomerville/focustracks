@@ -32,11 +32,13 @@ export default function RootLayout({
             __html: `
               try {
                 const theme = localStorage.getItem('theme') || 'system';
-                const resolvedTheme = theme === 'system' 
+                const resolvedTheme = theme === 'system'
                   ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
                   : theme;
+                document.documentElement.classList.remove('light', 'dark');
                 document.documentElement.classList.add(resolvedTheme);
               } catch (e) {
+                document.documentElement.classList.remove('light', 'dark');
                 document.documentElement.classList.add('light');
               }
             `,

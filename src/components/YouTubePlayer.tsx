@@ -87,8 +87,8 @@ export default function YouTubePlayer({
 
   // Load track when track changes
   useEffect(() => {
-    if (player && track) {
-      const videoId = getYouTubeId(track.audio_url)
+    if (player && track && track.youtube_url) {
+      const videoId = getYouTubeId(track.youtube_url)
       if (videoId) {
         player.loadVideoById(videoId)
       }
@@ -129,12 +129,11 @@ export default function YouTubePlayer({
     onSkipBack()
   }
 
-  if (!track) {
+  if (!track || !track.youtube_url) {
     return null
   }
 
-  const videoId = getYouTubeId(track.audio_url)
-  const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`
+  const youtubeUrl = track.youtube_url
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg z-50">

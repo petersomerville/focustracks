@@ -13,7 +13,9 @@ export interface Track {
   artist: string
   genre: string
   duration: number
-  audio_url: string
+  youtube_url?: string
+  spotify_url?: string
+  external_id?: string
   created_at: string
 }
 
