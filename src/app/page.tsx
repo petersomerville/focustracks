@@ -59,16 +59,16 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header onSearch={handleSearch} />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Hero Section */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
             Music for Focus & Productivity
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
             Discover curated tracks designed to enhance your concentration and help you stay focused during work and study sessions.
           </p>
         </div>
@@ -82,7 +82,7 @@ export default function Home() {
               className={`px-4 py-2 rounded-full border text-sm font-medium transition-colors ${
                 selectedGenre === category
                   ? 'bg-blue-600 text-white border-blue-600'
-                  : 'border-gray-300 text-gray-700 hover:bg-gray-100'
+                  : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
               }`}
             >
               {category}
@@ -94,14 +94,14 @@ export default function Home() {
         {loading && (
           <div className="text-center py-8">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="mt-2 text-gray-600">Loading tracks...</p>
+            <p className="mt-2 text-gray-600 dark:text-gray-400">Loading tracks...</p>
           </div>
         )}
 
         {/* Error State */}
         {error && (
           <div className="text-center py-8">
-            <p className="text-red-600">Error: {error}</p>
+            <p className="text-red-600 dark:text-red-400">Error: {error}</p>
           </div>
         )}
 
@@ -121,7 +121,7 @@ export default function Home() {
               ))
             ) : (
               <div className="col-span-full text-center py-8">
-                <p className="text-gray-600">No tracks found matching your criteria.</p>
+                <p className="text-gray-600 dark:text-gray-400">No tracks found matching your criteria.</p>
               </div>
             )}
           </div>
