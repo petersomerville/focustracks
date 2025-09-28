@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Header from '@/components/Header'
 import TrackCard from '@/components/TrackCard'
 import YouTubePlayer from '@/components/YouTubePlayer'
+import PlaylistSelectionModal from '@/components/PlaylistSelectionModal'
 import { Track } from '@/lib/supabase'
 import { useTracks } from '@/hooks/useTracks'
 
@@ -19,6 +20,10 @@ export default function Home() {
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [volume, setVolume] = useState(50)
+
+  // Playlist modal state
+  const [playlistModalOpen, setPlaylistModalOpen] = useState(false)
+  const [trackToAdd, setTrackToAdd] = useState<Track | null>(null)
 
   const handlePlay = (track: Track) => {
     setCurrentTrack(track)
@@ -46,8 +51,18 @@ export default function Home() {
   }
 
   const handleAddToPlaylist = (track: Track) => {
-    // TODO: Implement add to playlist logic
-    console.log('Add to playlist:', track.title)
+    setTrackToAdd(track)
+    setPlaylistModalOpen(true)
+  }
+
+  const handlePlaylistModalClose = () => {
+    setPlaylistModalOpen(false)
+    setTrackToAdd(null)
+  }
+
+  const handlePlaylistAddSuccess = () => {
+    // Show success feedback or refresh data if needed
+    console.log('Track added to playlist successfully!')
   }
 
   const handleGenreFilter = (genre: string) => {
@@ -141,6 +156,14 @@ export default function Home() {
           volume={volume}
         />
       )}
+
+      {/* Playlist Selection Modal */}
+      <PlaylistSelectionModal
+        isOpen={playlistModalOpen}
+        track={trackToAdd}
+        onClose={handlePlaylistModalClose}
+        onSuccess={handlePlaylistAddSuccess}
+      />
     </div>
   )
 }

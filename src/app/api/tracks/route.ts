@@ -48,7 +48,7 @@ const MOCK_TRACKS: Track[] = [
     artist: 'Focus Beat',
     genre: 'Electronic',
     duration: 3000, // 50 minutes
-    youtube_url: 'https://www.youtube.com/watch?v=jEy6MGu-N3o',
+    youtube_url: 'https://www.youtube.com/watch?v=YJNi7aRwUzU',
     spotify_url: 'https://open.spotify.com/track/6DCZcSspjsKoFjzjrWoCdn',
     created_at: '2024-01-11T11:45:00Z'
   },
@@ -78,7 +78,7 @@ const MOCK_TRACKS: Track[] = [
     artist: 'Zen Masters',
     genre: 'Ambient',
     duration: 1800, // 30 minutes
-    youtube_url: 'https://www.youtube.com/watch?v=IP7zOBrpBzI',
+    youtube_url: 'https://www.youtube.com/watch?v=kHnOIsQwkOg',
     created_at: '2024-01-08T08:00:00Z'
   },
   {

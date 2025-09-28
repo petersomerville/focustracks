@@ -1,63 +1,50 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { PlaylistTrack } from '@/lib/supabase'
+import {
+  MOCK_PLAYLIST_TRACKS,
+  addPlaylistTrack,
+  removePlaylistTrack,
+  getNextPlaylistTrackId
+} from '@/lib/mockData'
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = await createServerSupabaseClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
+    const { id } = await params
     const { trackId } = await request.json()
 
     if (!trackId) {
       return NextResponse.json({ error: 'Track ID is required' }, { status: 400 })
     }
 
-    // Check if playlist belongs to user
-    const { data: playlist, error: playlistError } = await supabase
-      .from('playlists')
-      .select('id')
-      .eq('id', params.id)
-      .eq('user_id', user.id)
-      .single()
+    // Check if track is already in playlist
+    const existingTrack = MOCK_PLAYLIST_TRACKS.find(
+      pt => pt.playlist_id === id && pt.track_id === trackId
+    )
 
-    if (playlistError || !playlist) {
-      return NextResponse.json({ error: 'Playlist not found' }, { status: 404 })
+    if (existingTrack) {
+      return NextResponse.json({ error: 'Track already in playlist' }, { status: 400 })
     }
 
     // Get next position
-    const { data: lastTrack, error: positionError } = await supabase
-      .from('playlist_tracks')
-      .select('position')
-      .eq('playlist_id', params.id)
-      .order('position', { ascending: false })
-      .limit(1)
-      .single()
+    const playlistTracks = MOCK_PLAYLIST_TRACKS.filter(pt => pt.playlist_id === id)
+    const nextPosition = playlistTracks.length > 0
+      ? Math.max(...playlistTracks.map(pt => pt.position)) + 1
+      : 1
 
-    const nextPosition = lastTrack ? lastTrack.position + 1 : 1
-
-    const { data: playlistTrack, error } = await supabase
-      .from('playlist_tracks')
-      .insert({
-        playlist_id: params.id,
-        track_id: trackId,
-        position: nextPosition
-      })
-      .select()
-      .single()
-
-    if (error) {
-      console.error('Error adding track to playlist:', error)
-      return NextResponse.json({ error: 'Failed to add track to playlist' }, { status: 500 })
+    // Create new playlist track
+    const newPlaylistTrack: PlaylistTrack = {
+      id: getNextPlaylistTrackId(),
+      playlist_id: id,
+      track_id: trackId,
+      position: nextPosition
     }
 
-    return NextResponse.json({ playlistTrack })
+    addPlaylistTrack(newPlaylistTrack)
+
+    return NextResponse.json({ playlistTrack: newPlaylistTrack })
   } catch (error) {
     console.error('Unexpected error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
@@ -66,16 +53,10 @@ export async function POST(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = await createServerSupabaseClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
+    const { id } = await params
     const { searchParams } = new URL(request.url)
     const trackId = searchParams.get('trackId')
 
@@ -83,28 +64,17 @@ export async function DELETE(
       return NextResponse.json({ error: 'Track ID is required' }, { status: 400 })
     }
 
-    // Check if playlist belongs to user
-    const { data: playlist, error: playlistError } = await supabase
-      .from('playlists')
-      .select('id')
-      .eq('id', params.id)
-      .eq('user_id', user.id)
-      .single()
+    // Find the playlist track to ensure it exists
+    const existingTrack = MOCK_PLAYLIST_TRACKS.find(
+      pt => pt.playlist_id === id && pt.track_id === trackId
+    )
 
-    if (playlistError || !playlist) {
-      return NextResponse.json({ error: 'Playlist not found' }, { status: 404 })
+    if (!existingTrack) {
+      return NextResponse.json({ error: 'Track not found in playlist' }, { status: 404 })
     }
 
-    const { error } = await supabase
-      .from('playlist_tracks')
-      .delete()
-      .eq('playlist_id', params.id)
-      .eq('track_id', trackId)
-
-    if (error) {
-      console.error('Error removing track from playlist:', error)
-      return NextResponse.json({ error: 'Failed to remove track from playlist' }, { status: 500 })
-    }
+    // Remove the playlist track
+    removePlaylistTrack(id, trackId)
 
     return NextResponse.json({ success: true })
   } catch (error) {
@@ -112,3 +82,5 @@ export async function DELETE(
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
+
+// Note: Mock data is now managed in /lib/mockData.ts for shared access

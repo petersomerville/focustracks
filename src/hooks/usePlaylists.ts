@@ -74,12 +74,33 @@ export function usePlaylists() {
 
       return { success: true }
     } catch (err) {
-      return { 
-        success: false, 
-        error: err instanceof Error ? err.message : 'An error occurred' 
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : 'An error occurred'
       }
     }
   }
 
-  return { playlists, loading, error, createPlaylist, addTrackToPlaylist }
+  const deletePlaylist = async (playlistId: string) => {
+    try {
+      const response = await fetch(`/api/playlists/${playlistId}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to delete playlist')
+      }
+
+      setPlaylists(prev => prev.filter(playlist => playlist.id !== playlistId))
+      return { success: true }
+    } catch (err) {
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : 'An error occurred'
+      }
+    }
+  }
+
+  return { playlists, loading, error, createPlaylist, addTrackToPlaylist, deletePlaylist }
 }

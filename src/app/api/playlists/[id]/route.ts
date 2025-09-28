@@ -1,48 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { MOCK_PLAYLISTS, MOCK_PLAYLIST_TRACKS, removePlaylist } from '@/lib/mockData'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = await createServerSupabaseClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    const { id } = await params
+    // Find playlist
+    const playlist = MOCK_PLAYLISTS.find(p => p.id === id)
 
-    const { data: playlist, error: playlistError } = await supabase
-      .from('playlists')
-      .select('*')
-      .eq('id', params.id)
-      .eq('user_id', user.id)
-      .single()
-
-    if (playlistError) {
-      console.error('Error fetching playlist:', playlistError)
+    if (!playlist) {
       return NextResponse.json({ error: 'Playlist not found' }, { status: 404 })
     }
 
-    const { data: tracks, error: tracksError } = await supabase
-      .from('playlist_tracks')
-      .select(`
-        *,
-        tracks (*)
-      `)
-      .eq('playlist_id', params.id)
-      .order('position')
+    // Get tracks API to get full track data
+    const tracksResponse = await fetch(`${request.nextUrl.origin}/api/tracks`)
+    const tracksData = await tracksResponse.json()
+    const allTracks = tracksData.tracks || []
 
-    if (tracksError) {
-      console.error('Error fetching playlist tracks:', tracksError)
-      return NextResponse.json({ error: 'Failed to fetch playlist tracks' }, { status: 500 })
-    }
+    // Get playlist tracks and join with full track data
+    const playlistTracks = MOCK_PLAYLIST_TRACKS
+      .filter(pt => pt.playlist_id === id)
+      .sort((a, b) => a.position - b.position)
+      .map(pt => allTracks.find(track => track.id === pt.track_id))
+      .filter(Boolean) // Remove any tracks that weren't found
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       playlist: {
         ...playlist,
-        tracks: tracks.map(pt => pt.tracks)
+        tracks: playlistTracks
       }
     })
   } catch (error) {
@@ -53,27 +40,19 @@ export async function GET(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = await createServerSupabaseClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { id } = await params
+    // Find playlist
+    const playlist = MOCK_PLAYLISTS.find(p => p.id === id)
+
+    if (!playlist) {
+      return NextResponse.json({ error: 'Playlist not found' }, { status: 404 })
     }
 
-    const { error } = await supabase
-      .from('playlists')
-      .delete()
-      .eq('id', params.id)
-      .eq('user_id', user.id)
-
-    if (error) {
-      console.error('Error deleting playlist:', error)
-      return NextResponse.json({ error: 'Failed to delete playlist' }, { status: 500 })
-    }
-
+    // Remove playlist and all its tracks
+    removePlaylist(id)
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Unexpected error:', error)
