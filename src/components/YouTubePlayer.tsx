@@ -56,6 +56,7 @@ export default function YouTubePlayer({
       const newPlayer = new window.YT.Player('youtube-player', {
         height: '0',
         width: '0',
+        host: 'https://www.youtube-nocookie.com',
         playerVars: {
           autoplay: 0,
           controls: 0,
@@ -66,19 +67,24 @@ export default function YouTubePlayer({
           modestbranding: 1,
           playsinline: 1,
           rel: 0,
+          origin: window.location.origin,
         },
         events: {
-          onReady: () => {
+          onReady: (event: any) => {
+            console.log('YouTube player ready')
             setPlayer(newPlayer)
           },
           onStateChange: (event: any) => {
             if (event.data === window.YT.PlayerState.PLAYING) {
-              // Player started playing
+              console.log('YouTube player started playing')
             } else if (event.data === window.YT.PlayerState.PAUSED) {
-              // Player paused
+              console.log('YouTube player paused')
             } else if (event.data === window.YT.PlayerState.ENDED) {
-              // Track ended
+              console.log('YouTube player ended')
             }
+          },
+          onError: (event: any) => {
+            console.error('YouTube player error:', event.data)
           }
         }
       })
@@ -90,7 +96,14 @@ export default function YouTubePlayer({
     if (player && track && track.youtube_url) {
       const videoId = getYouTubeId(track.youtube_url)
       if (videoId) {
-        player.loadVideoById(videoId)
+        console.log('Loading YouTube video:', videoId, 'for track:', track.title)
+        try {
+          player.loadVideoById(videoId)
+        } catch (error) {
+          console.error('Error loading YouTube video:', error)
+        }
+      } else {
+        console.error('Could not extract video ID from URL:', track.youtube_url)
       }
     }
   }, [player, track])
