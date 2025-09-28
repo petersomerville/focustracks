@@ -3,41 +3,19 @@
 import { useState } from 'react'
 import Header from '@/components/Header'
 import TrackCard from '@/components/TrackCard'
-import MusicPlayer from '@/components/MusicPlayer'
+import YouTubePlayer from '@/components/YouTubePlayer'
 import { Track } from '@/lib/supabase'
-
-// Mock data for development
-const mockTracks: Track[] = [
-  {
-    id: '1',
-    title: 'Deep Focus',
-    artist: 'Ambient Collective',
-    genre: 'Ambient',
-    duration: 180,
-    audio_url: '/audio/deep-focus.mp3',
-    created_at: '2024-01-01T00:00:00Z'
-  },
-  {
-    id: '2',
-    title: 'Study Session',
-    artist: 'Concentration Music',
-    genre: 'Classical',
-    duration: 240,
-    audio_url: '/audio/study-session.mp3',
-    created_at: '2024-01-01T00:00:00Z'
-  },
-  {
-    id: '3',
-    title: 'Coding Flow',
-    artist: 'Electronic Focus',
-    genre: 'Electronic',
-    duration: 300,
-    audio_url: '/audio/coding-flow.mp3',
-    created_at: '2024-01-01T00:00:00Z'
-  }
-]
+import { useTracks } from '@/hooks/useTracks'
 
 export default function Home() {
+  const [selectedGenre, setSelectedGenre] = useState('All')
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const { tracks, loading, error } = useTracks({ 
+    genre: selectedGenre, 
+    search: searchQuery 
+  })
+
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [volume, setVolume] = useState(50)
@@ -51,12 +29,16 @@ export default function Home() {
     setIsPlaying(false)
   }
 
+  const handleResume = () => {
+    setIsPlaying(true)
+  }
+
   const handleSkipBack = () => {
-    // TODO: Implement skip back logic
+    // YouTube player will handle this
   }
 
   const handleSkipForward = () => {
-    // TODO: Implement skip forward logic
+    // YouTube player will handle this
   }
 
   const handleVolumeChange = (newVolume: number) => {
@@ -68,9 +50,17 @@ export default function Home() {
     console.log('Add to playlist:', track.title)
   }
 
+  const handleGenreFilter = (genre: string) => {
+    setSelectedGenre(genre)
+  }
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query)
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
+      <Header onSearch={handleSearch} />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Hero Section */}
@@ -85,42 +75,72 @@ export default function Home() {
 
         {/* Category Filters */}
         <div className="flex flex-wrap gap-2 mb-8 justify-center">
-          {['All', 'Ambient', 'Classical', 'Electronic', 'Study', 'Work'].map((category) => (
+          {['All', 'Ambient', 'Classical', 'Electronic'].map((category) => (
             <button
               key={category}
-              className="px-4 py-2 rounded-full border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+              onClick={() => handleGenreFilter(category)}
+              className={`px-4 py-2 rounded-full border text-sm font-medium transition-colors ${
+                selectedGenre === category
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'border-gray-300 text-gray-700 hover:bg-gray-100'
+              }`}
             >
               {category}
             </button>
           ))}
         </div>
 
+        {/* Loading State */}
+        {loading && (
+          <div className="text-center py-8">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <p className="mt-2 text-gray-600">Loading tracks...</p>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="text-center py-8">
+            <p className="text-red-600">Error: {error}</p>
+          </div>
+        )}
+
         {/* Tracks Grid */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {mockTracks.map((track) => (
-            <TrackCard
-              key={track.id}
-              track={track}
-              isPlaying={currentTrack?.id === track.id && isPlaying}
-              onPlay={handlePlay}
-              onPause={handlePause}
-              onAddToPlaylist={handleAddToPlaylist}
-            />
-          ))}
-        </div>
+        {!loading && !error && (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {tracks.length > 0 ? (
+              tracks.map((track) => (
+                <TrackCard
+                  key={track.id}
+                  track={track}
+                  isPlaying={currentTrack?.id === track.id && isPlaying}
+                  onPlay={handlePlay}
+                  onPause={handlePause}
+                  onAddToPlaylist={handleAddToPlaylist}
+                />
+              ))
+            ) : (
+              <div className="col-span-full text-center py-8">
+                <p className="text-gray-600">No tracks found matching your criteria.</p>
+              </div>
+            )}
+          </div>
+        )}
       </main>
 
-      {/* Music Player */}
-      <MusicPlayer
-        currentTrack={currentTrack}
-        isPlaying={isPlaying}
-        onPlay={() => setIsPlaying(true)}
-        onPause={handlePause}
-        onSkipBack={handleSkipBack}
-        onSkipForward={handleSkipForward}
-        onVolumeChange={handleVolumeChange}
-        volume={volume}
-      />
+      {/* YouTube Player */}
+      {currentTrack && (
+        <YouTubePlayer
+          track={currentTrack}
+          isPlaying={isPlaying}
+          onPlay={handleResume}
+          onPause={handlePause}
+          onSkipBack={handleSkipBack}
+          onSkipForward={handleSkipForward}
+          onVolumeChange={handleVolumeChange}
+          volume={volume}
+        />
+      )}
     </div>
   )
 }
