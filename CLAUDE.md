@@ -96,20 +96,34 @@ All components have access to:
 
 **CRITICAL**: Before starting any new feature or making architectural changes, ALWAYS check current versions of key technologies:
 
+### Universal Discovery Commands:
 ```bash
-# Check package.json for current versions
-cat package.json | grep -E "(react|next|typescript|tailwindcss|@supabase)"
+# Identify project type and check common config files
+ls -la | grep -E "(package\.json|requirements\.txt|Pipfile|Cargo\.toml|go\.mod|composer\.json)"
 
-# Verify Node.js version
-node --version
-
-# Check specific framework configurations
-# - Tailwind v4 uses CSS-based config, not tailwind.config.js
-# - Next.js 15+ uses Turbopack by default
-# - React 19+ has updated types and behavior
+# Check for language/runtime versions
+python --version 2>/dev/null || echo "Python not found"
+node --version 2>/dev/null || echo "Node.js not found"
+php --version 2>/dev/null || echo "PHP not found"
+go version 2>/dev/null || echo "Go not found"
 ```
 
-**Key Version-Specific Considerations:**
+### Project-Specific Checks (customize per project):
+```bash
+# For JavaScript/Node.js projects:
+cat package.json | grep -E "(react|next|typescript|tailwindcss|@supabase)"
+
+# For Python projects:
+cat requirements.txt | head -10
+cat pyproject.toml | grep -E "(python|flask|django|fastapi)" 2>/dev/null
+
+# For any project - check README for version info:
+head -20 README.md | grep -i version
+```
+
+**🚨 CLAUDE CODE REMINDER**: When working on a new project or unfamiliar tech stack, ASK THE USER to customize this section with project-specific version commands and considerations.
+
+**Current Project-Specific Considerations:**
 - **Tailwind CSS v4**: Uses `@variant` syntax in CSS, no config file needed
 - **Next.js 15**: App Router is default, Turbopack enabled
 - **React 19**: Updated TypeScript types, new hooks behavior
