@@ -13,7 +13,6 @@ export default function ThemeToggle() {
   ] as const
 
   const handleThemeChange = (newTheme: 'light' | 'dark' | 'system') => {
-    console.log('Changing theme to:', newTheme)
     setTheme(newTheme)
   }
 
@@ -23,7 +22,7 @@ export default function ThemeToggle() {
         <button
           key={value}
           onClick={() => handleThemeChange(value)}
-          className={`flex items-center space-x-1 px-2 py-1 rounded-md text-sm transition-colors ${
+          className={`flex items-center justify-center p-2 rounded-md transition-colors ${
             theme === value
               ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm'
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
@@ -31,7 +30,6 @@ export default function ThemeToggle() {
           title={`Switch to ${label} mode`}
         >
           <Icon className="h-4 w-4" />
-          <span className="hidden sm:inline">{label}</span>
         </button>
       ))}
     </div>
