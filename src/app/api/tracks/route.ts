@@ -9,7 +9,7 @@ const MOCK_TRACKS: Track[] = [
     artist: 'Ambient Collective',
     genre: 'Ambient',
     duration: 3600, // 1 hour
-    youtube_url: 'https://www.youtube.com/watch?v=5qap5aO4i9A',
+    youtube_url: 'https://www.youtube.com/watch?v=jfKfPfyJRdk',
     spotify_url: 'https://open.spotify.com/track/4uLU6hMCjMI75M1A2tKUQC',
     created_at: '2024-01-15T10:00:00Z'
   },
@@ -19,7 +19,7 @@ const MOCK_TRACKS: Track[] = [
     artist: 'Classical Focus',
     genre: 'Classical',
     duration: 2400, // 40 minutes
-    youtube_url: 'https://www.youtube.com/watch?v=jfKfPfyJRdk',
+    youtube_url: 'https://www.youtube.com/watch?v=lFcSrYw-ARY',
     spotify_url: 'https://open.spotify.com/track/0VjIjW4GlULA4WZZeqtqZ5',
     created_at: '2024-01-14T15:30:00Z'
   },
@@ -97,7 +97,7 @@ const MOCK_TRACKS: Track[] = [
     artist: 'Nature Sounds Pro',
     genre: 'Ambient',
     duration: 7200, // 2 hours
-    youtube_url: 'https://www.youtube.com/watch?v=tI2GjDxz53M',
+    youtube_url: 'https://www.youtube.com/watch?v=n_Dv4JMiwK8',
     created_at: '2024-01-06T10:30:00Z'
   }
 ]
