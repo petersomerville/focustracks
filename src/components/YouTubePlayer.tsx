@@ -74,7 +74,7 @@ export default function YouTubePlayer({
             console.log('YouTube player ready')
             setPlayer(newPlayer)
           },
-          onStateChange: (event: any) => {
+                  onStateChange: (event: any) => {
             if (event.data === window.YT.PlayerState.PLAYING) {
               console.log('YouTube player started playing')
             } else if (event.data === window.YT.PlayerState.PAUSED) {

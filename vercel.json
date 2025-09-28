@@ -1,0 +1,7 @@
+{
+  "env": {
+    "NEXT_PUBLIC_SUPABASE_URL": "https://fjdpcetgcypnbwbfidti.supabase.co/",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZqZHBjZXRnY3lwbmJ3YmZpZHRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkwNjU2NDcsImV4cCI6MjA3NDY0MTY0N30.pnrvfnwYHhI33Pzx7_MYhNsgggm5gJ6jK7gVWnxfj8s",
+    "NEXT_PUBLIC_APP_URL": "https://focustracks.vercel.app"
+  }
+}

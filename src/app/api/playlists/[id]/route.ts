@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { MOCK_PLAYLISTS, MOCK_PLAYLIST_TRACKS, removePlaylist } from '@/lib/mockData'
+import { Track } from '@/lib/supabase'
 
 export async function GET(
   request: NextRequest,
@@ -23,8 +24,8 @@ export async function GET(
     const playlistTracks = MOCK_PLAYLIST_TRACKS
       .filter(pt => pt.playlist_id === id)
       .sort((a, b) => a.position - b.position)
-      .map(pt => allTracks.find(track => track.id === pt.track_id))
-      .filter(Boolean) // Remove any tracks that weren't found
+      .map(pt => allTracks.find((track: Track) => track.id === pt.track_id))
+      .filter(Boolean) as Track[] // Remove any tracks that weren't found
 
     return NextResponse.json({
       playlist: {

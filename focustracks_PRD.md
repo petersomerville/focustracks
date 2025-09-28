@@ -104,6 +104,13 @@ To create a minimal viable product that demonstrates expertise in React, Next.js
 - **View Playlist**: Display playlist with track list
 - **Play Playlist**: Play all tracks in sequence
 
+#### 4.1.5 User-Generated Content (Phase 4)
+
+- **Track Submission**: Users can submit YouTube/Spotify links for focus music
+- **Content Moderation**: Admin approval system for submitted tracks
+- **User Roles**: Admin vs regular user permissions
+- **Submission Guidelines**: Clear criteria for acceptable focus music
+
 ### 4.2 Technical Features (Learning Focus)
 
 #### 4.2.1 Frontend Architecture
@@ -328,6 +335,14 @@ playlist_tracks (
 - Add basic testing
 - Deploy to Vercel
 - Create documentation
+
+### 10.4 Phase 4: User-Generated Content (Future Enhancement)
+
+- Add track submission functionality
+- Implement content moderation system
+- Create admin interface for track approval
+- Add user roles and permissions
+- Enhance legal compliance for user-generated content
 
 ## 11. Success Criteria
 

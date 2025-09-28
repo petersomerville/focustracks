@@ -103,8 +103,8 @@ export async function validateMockTrackUrls() {
     const tracks = data.tracks || []
 
     const youtubeUrls = tracks
-      .filter((track: any) => track.youtube_url)
-      .map((track: any) => track.youtube_url)
+      .filter((track: { youtube_url?: string }) => track.youtube_url)
+      .map((track: { youtube_url: string }) => track.youtube_url)
 
     const validation = await validateYouTubeUrls(youtubeUrls)
 

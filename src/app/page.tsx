@@ -5,6 +5,8 @@ import Header from '@/components/Header'
 import TrackCard from '@/components/TrackCard'
 import YouTubePlayer from '@/components/YouTubePlayer'
 import PlaylistSelectionModal from '@/components/PlaylistSelectionModal'
+import ErrorMessage from '@/components/ErrorMessage'
+import LoadingSpinner from '@/components/LoadingSpinner'
 import { Track } from '@/lib/supabase'
 import { useTracks } from '@/hooks/useTracks'
 
@@ -107,16 +109,19 @@ export default function Home() {
 
         {/* Loading State */}
         {loading && (
-          <div className="text-center py-8">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="mt-2 text-gray-600 dark:text-gray-400">Loading tracks...</p>
+          <div className="py-12">
+            <LoadingSpinner size="lg" text="Loading tracks..." />
           </div>
         )}
 
         {/* Error State */}
         {error && (
-          <div className="text-center py-8">
-            <p className="text-red-600 dark:text-red-400">Error: {error}</p>
+          <div className="py-8">
+            <ErrorMessage
+              title="Failed to load tracks"
+              message={error}
+              variant="error"
+            />
           </div>
         )}
 

@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Header from '@/components/Header'
 import ProtectedRoute from '@/components/ProtectedRoute'
+import ErrorMessage from '@/components/ErrorMessage'
+import LoadingSpinner from '@/components/LoadingSpinner'
 import { usePlaylists } from '@/hooks/usePlaylists'
 import { Plus, Music, Trash2 } from 'lucide-react'
 
@@ -101,16 +103,19 @@ export default function PlaylistsPage() {
 
           {/* Loading State */}
           {loading && (
-            <div className="text-center py-8">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <p className="mt-2 text-gray-600 dark:text-gray-400">Loading playlists...</p>
+            <div className="py-12">
+              <LoadingSpinner size="lg" text="Loading playlists..." />
             </div>
           )}
 
           {/* Error State */}
           {error && (
-            <div className="text-center py-8">
-              <p className="text-red-600 dark:text-red-400">Error: {error}</p>
+            <div className="py-8">
+              <ErrorMessage
+                title="Failed to load playlists"
+                message={error}
+                variant="error"
+              />
             </div>
           )}
 
