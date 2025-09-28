@@ -2,6 +2,7 @@
 
 import { Play, Pause, Plus } from 'lucide-react'
 import { Track } from '@/lib/supabase'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface TrackCardProps {
   track: Track
@@ -18,6 +19,7 @@ export default function TrackCard({
   onPause, 
   onAddToPlaylist 
 }: TrackCardProps) {
+  const { user } = useAuth()
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
@@ -68,7 +70,7 @@ export default function TrackCard({
         </a>
 
         {/* Add to Playlist Button */}
-        {onAddToPlaylist && (
+        {onAddToPlaylist && user && (
           <button
             onClick={() => onAddToPlaylist(track)}
             className="flex-shrink-0 p-2 text-gray-400 hover:text-blue-600 transition-colors"

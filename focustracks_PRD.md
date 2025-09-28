@@ -83,10 +83,13 @@ To create a minimal viable product that demonstrates expertise in React, Next.js
 
 #### 4.1.2 Music Player
 
-- **Basic Controls**: Play/pause, skip forward/backward
+- **Embedded Playback**: YouTube embedded player within the FocusTracks interface
+- **External Links**: Direct links to Spotify tracks (opens in new tab/app)
+- **Basic Controls**: Play/pause, skip forward/backward (via embedded player)
 - **Track Display**: Current track title and artist
 - **Volume Control**: Basic volume slider
 - **Progress Bar**: Show playback progress
+- **No File Storage**: All audio content served from external platforms
 
 #### 4.1.3 User Authentication
 
@@ -124,6 +127,15 @@ To create a minimal viable product that demonstrates expertise in React, Next.js
 - **File Structure**: Well-organized project structure
 - **Environment Configuration**: Proper environment variable management
 
+#### 4.2.4 Music Integration Architecture
+
+- **No Local Audio Storage**: FocusTracks does not store or serve audio files directly
+- **External Service Integration**: All music content sourced from YouTube and Spotify
+- **Copyright Compliance**: Avoid copyright issues by linking to licensed platforms
+- **Embedded Playback**: YouTube iframe API for in-app listening experience
+- **Metadata Only**: Database stores track metadata and external service URLs
+- **Dual Platform Support**: YouTube for embedded playback, Spotify for external links
+
 ## 5. Technical Requirements
 
 ### 5.1 Technology Stack
@@ -134,7 +146,8 @@ To create a minimal viable product that demonstrates expertise in React, Next.js
 - **Database**: Supabase (PostgreSQL)
 - **Authentication**: Supabase Auth
 - **Deployment**: Vercel
-- **Music Integration**: Spotify Web API (primary), YouTube API (fallback)
+- **Music Integration**: YouTube embedded player (primary), Spotify Web API (secondary)
+- **Audio Storage**: No local audio file storage - links to external services only
 
 ### 5.2 Database Schema (Simplified)
 
@@ -144,10 +157,11 @@ To create a minimal viable product that demonstrates expertise in React, Next.js
 -- Users table (handled by Supabase Auth)
 users (id, email, created_at)
 
--- Tracks table (pre-populated with focus music)
+-- Tracks table (metadata linking to external services)
 tracks (
   id, title, artist, genre, duration,
-  audio_url, created_at
+  youtube_url, spotify_url, external_id,
+  created_at
 )
 
 -- Playlists table
