@@ -5,7 +5,9 @@
       "Bash(git commit:*)",
       "Bash(curl:*)",
       "Bash(npm run dev:*)",
-      "WebFetch(domain:ui.shadcn.com)"
+      "WebFetch(domain:ui.shadcn.com)",
+      "Bash(npx:*)",
+      "Bash(npm install:*)"
     ],
     "deny": [],
     "ask": []
