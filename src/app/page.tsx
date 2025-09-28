@@ -7,8 +7,10 @@ import YouTubePlayer from '@/components/YouTubePlayer'
 import PlaylistSelectionModal from '@/components/PlaylistSelectionModal'
 import ErrorMessage from '@/components/ErrorMessage'
 import LoadingSpinner from '@/components/LoadingSpinner'
+import { Button } from '@/components/ui/button'
 import { Track } from '@/lib/supabase'
 import { useTracks } from '@/hooks/useTracks'
+import { toast } from 'sonner'
 
 export default function Home() {
   const [selectedGenre, setSelectedGenre] = useState('All')
@@ -63,8 +65,9 @@ export default function Home() {
   }
 
   const handlePlaylistAddSuccess = () => {
-    // Show success feedback or refresh data if needed
-    console.log('Track added to playlist successfully!')
+    toast.success('Track added to playlist!', {
+      description: 'The track has been successfully added to your playlist.'
+    })
   }
 
   const handleGenreFilter = (genre: string) => {
@@ -76,16 +79,16 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-background">
       <Header onSearch={handleSearch} />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Hero Section */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+          <h1 className="text-4xl font-bold text-foreground mb-4">
             Music for Focus & Productivity
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Discover curated tracks designed to enhance your concentration and help you stay focused during work and study sessions.
           </p>
         </div>
@@ -93,17 +96,15 @@ export default function Home() {
         {/* Category Filters */}
         <div className="flex flex-wrap gap-2 mb-8 justify-center">
           {['All', 'Ambient', 'Classical', 'Electronic'].map((category) => (
-            <button
+            <Button
               key={category}
               onClick={() => handleGenreFilter(category)}
-              className={`px-4 py-2 rounded-full border text-sm font-medium transition-colors ${
-                selectedGenre === category
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-              }`}
+              variant={selectedGenre === category ? "default" : "outline"}
+              size="sm"
+              className="rounded-full"
             >
               {category}
-            </button>
+            </Button>
           ))}
         </div>
 
@@ -141,7 +142,7 @@ export default function Home() {
               ))
             ) : (
               <div className="col-span-full text-center py-8">
-                <p className="text-gray-600 dark:text-gray-400">No tracks found matching your criteria.</p>
+                <p className="text-muted-foreground">No tracks found matching your criteria.</p>
               </div>
             )}
           </div>
