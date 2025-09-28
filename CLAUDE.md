@@ -15,6 +15,7 @@ FocusTracks is a music discovery and playlist application built as a technical l
 - `npm run build` - Build production bundle with Turbopack
 - `npm start` - Start production server
 - `npm run lint` - Run ESLint for code quality
+- `npm run validate-youtube` - Validate all YouTube URLs in mock data
 
 ### Environment Setup
 Ensure these environment variables are configured:
@@ -149,6 +150,8 @@ head -20 README.md | grep -i version
 - Primary audio source: YouTube URLs in track records
 - Player component handles YouTube iframe API integration
 - Track metadata stored in Supabase database
+- YouTube URL validation utilities in `src/lib/youtube-validator.ts`
+- Run `npm run validate-youtube` to check all URLs before deployment
 
 ## Project Context
 

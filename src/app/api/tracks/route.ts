@@ -39,7 +39,7 @@ const MOCK_TRACKS: Track[] = [
     artist: 'Earth Tones',
     genre: 'Ambient',
     duration: 5400, // 1.5 hours
-    youtube_url: 'https://www.youtube.com/watch?v=sTux-QtKCQs',
+    youtube_url: 'https://www.youtube.com/watch?v=mPZkdNFkNps',
     created_at: '2024-01-12T14:20:00Z'
   },
   {
@@ -48,7 +48,7 @@ const MOCK_TRACKS: Track[] = [
     artist: 'Focus Beat',
     genre: 'Electronic',
     duration: 3000, // 50 minutes
-    youtube_url: 'https://www.youtube.com/watch?v=3s7d8D2z7ck',
+    youtube_url: 'https://www.youtube.com/watch?v=jEy6MGu-N3o',
     spotify_url: 'https://open.spotify.com/track/6DCZcSspjsKoFjzjrWoCdn',
     created_at: '2024-01-11T11:45:00Z'
   },
@@ -78,7 +78,7 @@ const MOCK_TRACKS: Track[] = [
     artist: 'Zen Masters',
     genre: 'Ambient',
     duration: 1800, // 30 minutes
-    youtube_url: 'https://www.youtube.com/watch?v=nOJWdHGzRfY',
+    youtube_url: 'https://www.youtube.com/watch?v=IP7zOBrpBzI',
     created_at: '2024-01-08T08:00:00Z'
   },
   {
