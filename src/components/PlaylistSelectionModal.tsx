@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { X, Plus } from 'lucide-react'
 import { Track, Playlist } from '@/lib/supabase'
 import { createLogger } from '@/lib/logger'
@@ -26,13 +26,7 @@ export default function PlaylistSelectionModal({
   const [creatingPlaylist, setCreatingPlaylist] = useState(false)
   const [showCreateForm, setShowCreateForm] = useState(false)
 
-  useEffect(() => {
-    if (isOpen) {
-      fetchPlaylists()
-    }
-  }, [isOpen])
-
-  const fetchPlaylists = async () => {
+  const fetchPlaylists = useCallback(async () => {
     try {
       setLoading(true)
       const response = await fetch('/api/playlists')
@@ -43,7 +37,13 @@ export default function PlaylistSelectionModal({
     } finally {
       setLoading(false)
     }
-  }
+  }, [logger])
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchPlaylists()
+    }
+  }, [isOpen, fetchPlaylists])
 
   const handleAddToPlaylist = async (playlistId: string) => {
     if (!track) return

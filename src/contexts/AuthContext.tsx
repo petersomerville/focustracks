@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { User } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { createLogger } from '@/lib/logger'
@@ -22,7 +22,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
   const logger = createLogger('AuthContext')
 
-  const fetchUserRole = async (userId: string) => {
+  const fetchUserRole = useCallback(async (userId: string) => {
     try {
       logger.debug('Fetching role for user ID', { userId })
       const { data, error } = await supabase
@@ -42,7 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       logger.error('Error fetching user role', error instanceof Error ? error : String(error))
       return 'user'
     }
-  }
+  }, [logger])
 
   useEffect(() => {
     // Get initial session
@@ -81,7 +81,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     )
 
     return () => subscription.unsubscribe()
-  }, [])
+  }, [fetchUserRole])
 
   const signIn = async (email: string, password: string) => {
     try {

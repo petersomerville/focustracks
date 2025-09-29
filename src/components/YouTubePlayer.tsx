@@ -7,7 +7,7 @@ import { createLogger } from '@/lib/logger'
 const logger = createLogger('youtube-player')
 
 // YouTube Player Factory - can be mocked in tests
-export const createYouTubePlayer = (containerId: string, options: any): YT.Player => {
+export const createYouTubePlayer = (containerId: string, options: YT.PlayerOptions): YT.Player => {
   return new window.YT.Player(containerId, options)
 }
 
@@ -87,7 +87,7 @@ export default function YouTubePlayer({
           getPlayerState: () => 2,
           seekTo: () => {},
           destroy: () => {},
-        } as any
+        } as unknown as YT.Player
         setPlayer(mockPlayer)
         playerInstanceRef.current = mockPlayer
         return
@@ -110,24 +110,27 @@ export default function YouTubePlayer({
           origin: window.location.origin,
         },
         events: {
-          onReady: (event: YT.PlayerEvent) => {
+          onReady: (_event: YT.PlayerEvent) => {
             logger.debug('YouTube player initialized successfully')
             setPlayer(newPlayer)
             playerInstanceRef.current = newPlayer
           },
-          onStateChange: (event: YT.PlayerEvent) => {
+          onStateChange: (event: YT.OnStateChangeEvent) => {
             const stateName = {
               [window.YT.PlayerState.PLAYING]: 'playing',
               [window.YT.PlayerState.PAUSED]: 'paused',
-              [window.YT.PlayerState.ENDED]: 'ended'
-            }[((event as any).data as number)] || 'unknown'
+              [window.YT.PlayerState.ENDED]: 'ended',
+              [window.YT.PlayerState.UNSTARTED]: 'unstarted',
+              [window.YT.PlayerState.BUFFERING]: 'buffering',
+              [window.YT.PlayerState.CUED]: 'cued'
+            }[event.data] || 'unknown'
 
             if (stateName !== 'unknown') {
-              logger.debug(`Player state changed to ${stateName}`, { state: (event as any).data })
+              logger.debug(`Player state changed to ${stateName}`, { state: event.data })
             }
           },
-          onError: (event: YT.PlayerEvent) => {
-            logger.error('YouTube player error occurred', String((event as any).data), { errorCode: (event as any).data })
+          onError: (event: YT.OnErrorEvent) => {
+            logger.error('YouTube player error occurred', String(event.data), { errorCode: event.data })
           }
         }
       })
