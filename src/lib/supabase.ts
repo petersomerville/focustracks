@@ -19,6 +19,29 @@ export interface Track {
   created_at: string
 }
 
+export interface TrackSubmission {
+  id: string
+  title: string
+  artist: string
+  genre: string
+  duration: number
+  youtube_url?: string
+  spotify_url?: string
+  description: string
+  submitted_by: string
+  status: 'pending' | 'approved' | 'rejected'
+  admin_notes?: string
+  created_at: string
+  updated_at: string
+}
+
+export interface UserProfile {
+  id: string
+  email: string
+  role: 'user' | 'admin'
+  created_at: string
+}
+
 export interface Playlist {
   id: string
   name: string
