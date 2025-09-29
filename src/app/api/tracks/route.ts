@@ -10,7 +10,6 @@ const MOCK_TRACKS: Track[] = [
     genre: 'Ambient',
     duration: 3600, // 1 hour
     youtube_url: 'https://www.youtube.com/watch?v=jfKfPfyJRdk',
-    spotify_url: 'https://open.spotify.com/track/4uLU6hMCjMI75M1A2tKUQC',
     created_at: '2024-01-15T10:00:00Z'
   },
   {
@@ -20,7 +19,6 @@ const MOCK_TRACKS: Track[] = [
     genre: 'Classical',
     duration: 2400, // 40 minutes
     youtube_url: 'https://www.youtube.com/watch?v=lFcSrYw-ARY',
-    spotify_url: 'https://open.spotify.com/track/0VjIjW4GlULA4WZZeqtqZ5',
     created_at: '2024-01-14T15:30:00Z'
   },
   {
@@ -30,7 +28,6 @@ const MOCK_TRACKS: Track[] = [
     genre: 'Electronic',
     duration: 2700, // 45 minutes
     youtube_url: 'https://www.youtube.com/watch?v=f02mOEt11OQ',
-    spotify_url: 'https://open.spotify.com/track/2takcwOaAZWiXQijPHIx7B',
     created_at: '2024-01-13T09:15:00Z'
   },
   {
@@ -49,7 +46,6 @@ const MOCK_TRACKS: Track[] = [
     genre: 'Electronic',
     duration: 3000, // 50 minutes
     youtube_url: 'https://www.youtube.com/watch?v=YJNi7aRwUzU',
-    spotify_url: 'https://open.spotify.com/track/6DCZcSspjsKoFjzjrWoCdn',
     created_at: '2024-01-11T11:45:00Z'
   },
   {
@@ -59,7 +55,7 @@ const MOCK_TRACKS: Track[] = [
     genre: 'Classical',
     duration: 2100, // 35 minutes
     youtube_url: 'https://www.youtube.com/watch?v=6JQm5aSjX6g',
-    spotify_url: 'https://open.spotify.com/track/5FVd6KXrgO9B3JPmC8OPst',
+    spotify_url: 'https://open.spotify.com/track/6xhoBhuN0YxdQba90YvLc0',
     created_at: '2024-01-10T16:00:00Z'
   },
   {
@@ -69,7 +65,6 @@ const MOCK_TRACKS: Track[] = [
     genre: 'Electronic',
     duration: 4200, // 70 minutes
     youtube_url: 'https://www.youtube.com/watch?v=5yx6BWlEVcY',
-    spotify_url: 'https://open.spotify.com/track/0vvXsWCC9xrXsKd4FyS8kM',
     created_at: '2024-01-09T13:30:00Z'
   },
   {
@@ -88,7 +83,7 @@ const MOCK_TRACKS: Track[] = [
     genre: 'Classical',
     duration: 2700, // 45 minutes
     youtube_url: 'https://www.youtube.com/watch?v=9E6b3swbnWg',
-    spotify_url: 'https://open.spotify.com/track/4Nd3c3g4n3fBqn3bSYgWfP',
+    spotify_url: 'https://open.spotify.com/track/7ktsCbdX1vH3raxW8yRNv6',
     created_at: '2024-01-07T12:15:00Z'
   },
   {
