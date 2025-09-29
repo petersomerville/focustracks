@@ -1,19 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { Playlist } from '@/lib/supabase'
-import { MOCK_PLAYLISTS, addPlaylist, getNextPlaylistId } from '@/lib/mockData'
+import { supabase } from '@/lib/supabase'
 import { createLogger } from '@/lib/logger'
-import { createPlaylistSchema, createErrorResponse, formatZodErrors } from '@/lib/api-schemas'
+import { createPlaylistSchema, createErrorResponse, formatZodErrors, createApiResponse } from '@/lib/api-schemas'
 
 export async function GET(_request: NextRequest) {
   const logger = createLogger('api:playlists')
-  try {
-    // For Phase 2, return mock playlists for demo user
-    // In real implementation, this would check authentication
-    const userPlaylists = MOCK_PLAYLISTS.filter(playlist => playlist.user_id === 'demo-user-1')
+  const startTime = Date.now()
 
-    return NextResponse.json({ playlists: userPlaylists })
+  try {
+    logger.apiRequest('GET', '/api/playlists')
+
+    // Query playlists from database
+    const { data: playlists, error, count } = await supabase
+      .from('playlists')
+      .select('*', { count: 'exact' })
+      .order('created_at', { ascending: false })
+
+    const duration = Date.now() - startTime
+
+    if (error) {
+      logger.error('Database query failed', error, { duration })
+      logger.apiResponse('GET', '/api/playlists', 500, duration)
+      return NextResponse.json(
+        createErrorResponse('Failed to fetch playlists', 'Database query error', 'DATABASE_ERROR'),
+        { status: 500 }
+      )
+    }
+
+    logger.dbQuery('SELECT playlists', duration, { resultsCount: playlists?.length })
+    logger.apiResponse('GET', '/api/playlists', 200, duration)
+
+    const response = createApiResponse({ playlists: playlists || [] })
+    return NextResponse.json(response)
   } catch (error) {
+    const duration = Date.now() - startTime
     logger.error('Unexpected error fetching playlists', error instanceof Error ? error : String(error))
+    logger.apiResponse('GET', '/api/playlists', 500, duration)
+
     return NextResponse.json(
       createErrorResponse('Internal server error', 'An unexpected error occurred', 'INTERNAL_ERROR'),
       { status: 500 }
@@ -23,6 +46,8 @@ export async function GET(_request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const logger = createLogger('api:playlists')
+  const startTime = Date.now()
+
   try {
     const body = await request.json()
     
@@ -40,25 +65,42 @@ export async function POST(request: NextRequest) {
 
     const { name } = validation.data
 
-    // Create new playlist with mock data
-    const newPlaylist: Playlist = {
-      id: getNextPlaylistId(),
-      name: name.trim(),
-      user_id: 'demo-user-1',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+    logger.apiRequest('POST', '/api/playlists', { name })
+
+    // Create new playlist in database
+    const { data: newPlaylist, error } = await supabase
+      .from('playlists')
+      .insert({
+        name: name.trim(),
+        user_id: 'demo-user-1', // For now, use demo user. In production, get from auth
+      })
+      .select()
+      .single()
+
+    const duration = Date.now() - startTime
+
+    if (error) {
+      logger.error('Database insert failed', error, { name, duration })
+      logger.apiResponse('POST', '/api/playlists', 500, duration)
+      return NextResponse.json(
+        createErrorResponse('Failed to create playlist', 'Database insert error', 'DATABASE_ERROR'),
+        { status: 500 }
+      )
     }
 
-    addPlaylist(newPlaylist)
+    logger.dbQuery('INSERT playlist', duration, { playlistId: newPlaylist.id })
+    logger.apiResponse('POST', '/api/playlists', 201, duration)
 
-    return NextResponse.json({ playlist: newPlaylist })
+    const response = createApiResponse({ playlist: newPlaylist })
+    return NextResponse.json(response, { status: 201 })
   } catch (error) {
+    const duration = Date.now() - startTime
     logger.error('Unexpected error creating playlist', error instanceof Error ? error : String(error))
+    logger.apiResponse('POST', '/api/playlists', 500, duration)
+
     return NextResponse.json(
       createErrorResponse('Internal server error', 'An unexpected error occurred', 'INTERNAL_ERROR'),
       { status: 500 }
     )
   }
 }
-
-// Note: Mock data is now managed in /lib/mockData.ts for shared access
