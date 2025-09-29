@@ -122,7 +122,7 @@ export default function PlaylistsPage() {
           {/* Playlists Grid */}
           {!loading && !error && (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {playlists.length > 0 ? (
+              {playlists && playlists.length > 0 ? (
                 playlists.map((playlist) => (
                   <div key={playlist.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-6 hover:shadow-md transition-shadow">
                     <div className="flex items-start justify-between">

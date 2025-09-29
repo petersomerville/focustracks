@@ -19,7 +19,7 @@ export function usePlaylists() {
           throw new Error(data.error || 'Failed to fetch playlists')
         }
 
-        setPlaylists(data.playlists)
+        setPlaylists(data.playlists || [])
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred')
       } finally {
