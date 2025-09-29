@@ -28,11 +28,12 @@ export default function MusicPlayer({
     return null
   }
 
-  const formatDuration = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins}:${secs.toString().padStart(2, '0')}`
-  }
+  // Format duration utility - could be used for displaying track time
+  // const formatDuration = (seconds: number) => {
+  //   const mins = Math.floor(seconds / 60)
+  //   const secs = seconds % 60
+  //   return `${mins}:${secs.toString().padStart(2, '0')}`
+  // }
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg">

@@ -89,6 +89,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
       return { error: error?.message ?? null }
     } catch (error) {
+      console.error('SignIn error:', error)
       return { error: 'An unexpected error occurred' }
     }
   }
@@ -101,6 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
       return { error: error?.message ?? null }
     } catch (error) {
+      console.error('SignUp error:', error)
       return { error: 'An unexpected error occurred' }
     }
   }

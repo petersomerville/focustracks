@@ -1,6 +1,6 @@
 'use client'
 
-import { Music, Search, User, LogIn, LogOut, List, Settings } from 'lucide-react'
+import { Music, Search, User, LogOut, List, Settings } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useState } from 'react'
 import AuthModal from './AuthModal'

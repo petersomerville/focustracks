@@ -24,7 +24,7 @@ export default function YouTubePlayer({
   onVolumeChange,
   volume
 }: YouTubePlayerProps) {
-  const [player, setPlayer] = useState<any>(null)
+  const [player, setPlayer] = useState<YTPlayer | null>(null)
   const [isPlayerReady, setIsPlayerReady] = useState(false)
 
   // Extract YouTube video ID from URL
@@ -70,11 +70,11 @@ export default function YouTubePlayer({
           origin: window.location.origin,
         },
         events: {
-          onReady: (event: any) => {
+          onReady: (_event: YTEvent) => {
             console.log('YouTube player ready')
             setPlayer(newPlayer)
           },
-                  onStateChange: (event: any) => {
+          onStateChange: (event: YTEvent) => {
             if (event.data === window.YT.PlayerState.PLAYING) {
               console.log('YouTube player started playing')
             } else if (event.data === window.YT.PlayerState.PAUSED) {
@@ -83,7 +83,7 @@ export default function YouTubePlayer({
               console.log('YouTube player ended')
             }
           },
-          onError: (event: any) => {
+          onError: (event: YTEvent) => {
             console.error('YouTube player error:', event.data)
           }
         }
@@ -143,25 +143,29 @@ export default function YouTubePlayer({
   }
 
   if (!track || !track.youtube_url) {
-    return null
+    return (
+      <div data-testid="youtube-player-no-url">
+        No valid YouTube URL provided
+      </div>
+    )
   }
 
   const youtubeUrl = track.youtube_url
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg z-50">
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg z-50" data-testid="youtube-player-container">
       <div className="max-w-7xl mx-auto px-4 py-4">
         <div className="flex items-center space-x-4">
           {/* Track Info */}
           <div className="flex-1 min-w-0">
+            <p className="text-xs text-gray-500 uppercase tracking-wide">
+              Now Playing:
+            </p>
             <h4 className="text-sm font-medium text-gray-900 truncate">
               {track.title}
             </h4>
             <p className="text-xs text-gray-600 truncate">
-              {track.artist}
-            </p>
-            <p className="text-xs text-blue-600 truncate">
-              Now playing via YouTube
+              by {track.artist}
             </p>
           </div>
 
@@ -171,6 +175,7 @@ export default function YouTubePlayer({
               onClick={handleSkipBack}
               className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
               title="Skip back 10s"
+              aria-label="Skip back 10 seconds"
             >
               <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M8.445 14.832A1 1 0 0010 14v-2.798l5.445 3.63A1 1 0 0017 14V6a1 1 0 00-1.555-.832L10 8.798V6a1 1 0 00-1.555-.832l-6 4a1 1 0 000 1.664l6 4z"/>
@@ -180,6 +185,7 @@ export default function YouTubePlayer({
             <button
               onClick={isPlaying ? onPause : onPlay}
               className="p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors"
+              aria-label={isPlaying ? 'Pause' : 'Play'}
             >
               {isPlaying ? (
                 <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
@@ -196,6 +202,7 @@ export default function YouTubePlayer({
               onClick={handleSkipForward}
               className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
               title="Skip forward 10s"
+              aria-label="Skip forward 10 seconds"
             >
               <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M4.555 5.168A1 1 0 003 6v8a1 1 0 001.555.832L10 11.202V14a1 1 0 001.555.832l6-4a1 1 0 000-1.664l-6-4A1 1 0 0010 6v2.798l-5.445-3.63z"/>
@@ -215,6 +222,10 @@ export default function YouTubePlayer({
               value={volume}
               onChange={(e) => onVolumeChange(Number(e.target.value))}
               className="w-20"
+              aria-label="Volume control"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={volume}
             />
           </div>
 
@@ -225,6 +236,7 @@ export default function YouTubePlayer({
             rel="noopener noreferrer"
             className="p-2 text-gray-400 hover:text-red-600 transition-colors"
             title="Open in YouTube"
+            aria-label={`Open ${track.title} by ${track.artist} in YouTube`}
           >
             <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
@@ -239,10 +251,51 @@ export default function YouTubePlayer({
   )
 }
 
+// YouTube API type definitions
+interface YTPlayer {
+  playVideo(): void
+  pauseVideo(): void
+  loadVideoById(videoId: string): void
+  setVolume(volume: number): void
+  getCurrentTime(): number
+  getDuration(): number
+  getPlayerState(): number
+  seekTo(seconds: number, allowSeekAhead?: boolean): void
+}
+
+interface YTEvent {
+  target: YTPlayer
+  data: number
+}
+
+interface YTPlayerConstructor {
+  new (elementId: string, options: {
+    width: string | number
+    height: string | number
+    videoId?: string
+    host?: string
+    playerVars: Record<string, unknown>
+    events: {
+      onReady?: (event: YTEvent) => void
+      onStateChange?: (event: YTEvent) => void
+      onError?: (event: YTEvent) => void
+    }
+  }): YTPlayer
+}
+
+interface YTNamespace {
+  Player: YTPlayerConstructor
+  PlayerState: {
+    PLAYING: number
+    PAUSED: number
+    ENDED: number
+  }
+}
+
 // Extend Window interface for YouTube API
 declare global {
   interface Window {
-    YT: any
+    YT: YTNamespace
     onYouTubeIframeAPIReady: () => void
   }
 }

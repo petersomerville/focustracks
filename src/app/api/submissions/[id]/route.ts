@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase, Track } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 import { createClient } from '@supabase/supabase-js'
+import type { Track } from '@/lib/supabase'
 
 // Function to create admin client with service role for bypassing RLS
 function createSupabaseAdmin() {
@@ -87,7 +88,7 @@ export async function PUT(
 
     if (status === 'approved') {
       // Prepare track data for insertion with backward compatibility
-      const trackData: any = {
+      const trackData: Partial<Track> & { audio_url?: string } = {
         title: submission.title,
         artist: submission.artist,
         genre: submission.genre,

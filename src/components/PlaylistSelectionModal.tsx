@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Plus, Check } from 'lucide-react'
+import { X, Plus } from 'lucide-react'
 import { Track, Playlist } from '@/lib/supabase'
 
 interface PlaylistSelectionModalProps {
