@@ -13,7 +13,7 @@ export interface LogEntry {
   level: LogLevel
   message: string
   context?: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
   error?: Error | string
 }
 
@@ -147,7 +147,7 @@ class Logger {
   private createEntry(
     level: LogLevel,
     message: string,
-    metadata?: Record<string, any>,
+    metadata?: Record<string, unknown>,
     error?: Error | string
   ): LogEntry {
     const entry: LogEntry = {
@@ -182,35 +182,35 @@ class Logger {
   /**
    * Debug level logging
    */
-  debug(message: string, metadata?: Record<string, any>): void {
+  debug(message: string, metadata?: Record<string, unknown>): void {
     this.output(this.createEntry('debug', message, metadata))
   }
 
   /**
    * Info level logging
    */
-  info(message: string, metadata?: Record<string, any>): void {
+  info(message: string, metadata?: Record<string, unknown>): void {
     this.output(this.createEntry('info', message, metadata))
   }
 
   /**
    * Warning level logging
    */
-  warn(message: string, metadata?: Record<string, any>, error?: Error | string): void {
+  warn(message: string, metadata?: Record<string, unknown>, error?: Error | string): void {
     this.output(this.createEntry('warn', message, metadata, error))
   }
 
   /**
    * Error level logging
    */
-  error(message: string, error?: Error | string, metadata?: Record<string, any>): void {
+  error(message: string, error?: Error | string, metadata?: Record<string, unknown>): void {
     this.output(this.createEntry('error', message, metadata, error))
   }
 
   /**
    * Log API request
    */
-  apiRequest(method: string, path: string, metadata?: Record<string, any>): void {
+  apiRequest(method: string, path: string, metadata?: Record<string, unknown>): void {
     this.info(`${method} ${path}`, {
       type: 'api_request',
       method,
@@ -223,22 +223,26 @@ class Logger {
    * Log API response
    */
   apiResponse(method: string, path: string, status: number, duration?: number): void {
-    const level = status >= 400 ? 'error' : 'info'
     const message = `${method} ${path} - ${status}`
-
-    this[level](message, {
+    const metadata = {
       type: 'api_response',
       method,
       path,
       status,
       duration
-    })
+    }
+
+    if (status >= 400) {
+      this.error(message, undefined, metadata)
+    } else {
+      this.info(message, metadata)
+    }
   }
 
   /**
    * Log database query
    */
-  dbQuery(query: string, duration?: number, metadata?: Record<string, any>): void {
+  dbQuery(query: string, duration?: number, metadata?: Record<string, unknown>): void {
     this.debug('Database query executed', {
       type: 'db_query',
       query: query.substring(0, 100) + (query.length > 100 ? '...' : ''),
@@ -250,7 +254,7 @@ class Logger {
   /**
    * Log user action
    */
-  userAction(userId: string, action: string, metadata?: Record<string, any>): void {
+  userAction(userId: string, action: string, metadata?: Record<string, unknown>): void {
     this.info(`User action: ${action}`, {
       type: 'user_action',
       userId,
@@ -295,25 +299,25 @@ export function createLogger(context: string, config?: Partial<LoggerConfig>): L
 /**
  * Quick debug logging
  */
-export const debug = (message: string, metadata?: Record<string, any>) =>
+export const debug = (message: string, metadata?: Record<string, unknown>) =>
   logger.debug(message, metadata)
 
 /**
  * Quick info logging
  */
-export const info = (message: string, metadata?: Record<string, any>) =>
+export const info = (message: string, metadata?: Record<string, unknown>) =>
   logger.info(message, metadata)
 
 /**
  * Quick warning logging
  */
-export const warn = (message: string, metadata?: Record<string, any>, error?: Error | string) =>
+export const warn = (message: string, metadata?: Record<string, unknown>, error?: Error | string) =>
   logger.warn(message, metadata, error)
 
 /**
  * Quick error logging
  */
-export const error = (message: string, err?: Error | string, metadata?: Record<string, any>) =>
+export const error = (message: string, err?: Error | string, metadata?: Record<string, unknown>) =>
   logger.error(message, err, metadata)
 
 // =============================================================================
@@ -326,7 +330,7 @@ export const error = (message: string, err?: Error | string, metadata?: Record<s
  *
  * @deprecated Use structured logging methods instead
  */
-export const log = (message: any, ...args: any[]) => {
+export const log = (message: unknown, ...args: unknown[]) => {
   if (typeof message === 'string') {
     logger.info(message, args.length > 0 ? { args } : undefined)
   } else {
@@ -339,7 +343,7 @@ export const log = (message: any, ...args: any[]) => {
  *
  * @deprecated Use logger.error instead
  */
-export const logError = (message: any, ...args: any[]) => {
+export const logError = (message: unknown, ...args: unknown[]) => {
   if (message instanceof Error) {
     logger.error(message.message, message, args.length > 0 ? { args } : undefined)
   } else if (typeof message === 'string') {

@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { Track } from '@/lib/supabase'
+import { createLogger } from '@/lib/logger'
+
+const logger = createLogger('youtube-player')
 
 interface YouTubePlayerProps {
   track: Track | null
@@ -71,20 +74,22 @@ export default function YouTubePlayer({
         },
         events: {
           onReady: (_event: YTEvent) => {
-            console.log('YouTube player ready')
+            logger.debug('YouTube player initialized successfully')
             setPlayer(newPlayer)
           },
           onStateChange: (event: YTEvent) => {
-            if (event.data === window.YT.PlayerState.PLAYING) {
-              console.log('YouTube player started playing')
-            } else if (event.data === window.YT.PlayerState.PAUSED) {
-              console.log('YouTube player paused')
-            } else if (event.data === window.YT.PlayerState.ENDED) {
-              console.log('YouTube player ended')
+            const stateName = {
+              [window.YT.PlayerState.PLAYING]: 'playing',
+              [window.YT.PlayerState.PAUSED]: 'paused',
+              [window.YT.PlayerState.ENDED]: 'ended'
+            }[event.data] || 'unknown'
+
+            if (stateName !== 'unknown') {
+              logger.debug(`Player state changed to ${stateName}`, { state: event.data })
             }
           },
           onError: (event: YTEvent) => {
-            console.error('YouTube player error:', event.data)
+            logger.error('YouTube player error occurred', String(event.data), { errorCode: event.data })
           }
         }
       })
@@ -96,14 +101,25 @@ export default function YouTubePlayer({
     if (player && track && track.youtube_url) {
       const videoId = getYouTubeId(track.youtube_url)
       if (videoId) {
-        console.log('Loading YouTube video:', videoId, 'for track:', track.title)
+        logger.info('Loading track in YouTube player', {
+          videoId,
+          trackTitle: track.title,
+          trackArtist: track.artist
+        })
         try {
           player.loadVideoById(videoId)
         } catch (error) {
-          console.error('Error loading YouTube video:', error)
+          logger.error('Failed to load YouTube video', error instanceof Error ? error : String(error), {
+            videoId,
+            trackTitle: track.title,
+            youtubeUrl: track.youtube_url
+          })
         }
       } else {
-        console.error('Could not extract video ID from URL:', track.youtube_url)
+        logger.error('Could not extract valid video ID from YouTube URL', track.youtube_url, {
+          trackTitle: track.title,
+          youtubeUrl: track.youtube_url
+        })
       }
     }
   }, [player, track])

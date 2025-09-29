@@ -14,7 +14,9 @@
       "Bash(npm test)",
       "Bash(jobs)",
       "Bash(npm test:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(npm run data:validate:*)",
+      "Bash(npm run test:*)"
     ],
     "deny": [],
     "ask": []

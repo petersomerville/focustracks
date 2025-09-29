@@ -37,7 +37,7 @@ const spotifyUrlSchema = z
   )
 
 const genreSchema = z.enum(['Ambient', 'Classical', 'Electronic', 'Jazz', 'Other'], {
-  errorMap: () => ({ message: 'Genre must be one of: Ambient, Classical, Electronic, Jazz, Other' })
+  message: 'Genre must be one of: Ambient, Classical, Electronic, Jazz, Other'
 })
 
 const durationSchema = z
@@ -228,7 +228,7 @@ export const errorResponseSchema = z.object({
   error: z.string(),
   message: z.string().optional(),
   code: z.string().optional(),
-  details: z.record(z.any()).optional(),
+  details: z.record(z.string(), z.unknown()).optional(),
 })
 
 /**
@@ -253,7 +253,7 @@ export const validationErrorResponseSchema = z.object({
 export const successResponseSchema = z.object({
   success: z.boolean(),
   message: z.string().optional(),
-  data: z.any().optional(),
+  data: z.unknown().optional(),
 })
 
 /**
@@ -318,7 +318,7 @@ export function createErrorResponse(
   error: string,
   message?: string,
   code?: string,
-  details?: Record<string, any>
+  details?: Record<string, unknown>
 ): ErrorResponse {
   return {
     error,
@@ -335,9 +335,9 @@ export function formatZodErrors(error: z.ZodError): ValidationErrorResponse {
   return {
     error: 'Validation failed',
     issues: error.issues.map(issue => ({
-      path: issue.path,
+      path: issue.path as (string | number)[],
       message: issue.message,
-      code: issue.code,
+      code: String(issue.code),
     })),
   }
 }
