@@ -24,12 +24,6 @@ export default function PlaylistDetailPage() {
   const [isPlaying, setIsPlaying] = useState(false)
   const [volume, setVolume] = useState(50)
 
-  useEffect(() => {
-    if (playlistId) {
-      fetchPlaylist()
-    }
-  }, [playlistId, fetchPlaylist])
-
   const fetchPlaylist = useCallback(async () => {
     try {
       setLoading(true)
@@ -49,6 +43,12 @@ export default function PlaylistDetailPage() {
       setLoading(false)
     }
   }, [playlistId])
+
+  useEffect(() => {
+    if (playlistId) {
+      fetchPlaylist()
+    }
+  }, [playlistId, fetchPlaylist])
 
   const handleRemoveTrack = async (trackId: string) => {
     if (!playlist) return
