@@ -9,9 +9,9 @@ export async function GET(
 ) {
   const logger = createLogger('api:playlists:[id]')
   const startTime = Date.now()
+  const { id } = await params
 
   try {
-    const { id } = await params
 
     // Validate UUID format
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
@@ -104,9 +104,9 @@ export async function PUT(
 ) {
   const logger = createLogger('api:playlists:[id]:update')
   const startTime = Date.now()
+  const { id } = await params
 
   try {
-    const { id } = await params
     const body = await request.json()
     
     // Validate request body using Zod schema
@@ -179,9 +179,9 @@ export async function DELETE(
 ) {
   const logger = createLogger('api:playlists:[id]:delete')
   const startTime = Date.now()
+  const { id } = await params
 
   try {
-    const { id } = await params
 
     logger.apiRequest('DELETE', `/api/playlists/${id}`)
 

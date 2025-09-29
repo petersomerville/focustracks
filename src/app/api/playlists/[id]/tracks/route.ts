@@ -18,9 +18,9 @@ export async function POST(
 ) {
   const logger = createLogger('api:playlists:[id]:tracks:add')
   const startTime = Date.now()
+  const { id } = await params
 
   try {
-    const { id } = await params
     const body = await request.json()
     
     // Validate request body using Zod schema
@@ -125,9 +125,9 @@ export async function DELETE(
 ) {
   const logger = createLogger('api:playlists:[id]:tracks:remove')
   const startTime = Date.now()
+  const { id } = await params
 
   try {
-    const { id } = await params
     const { searchParams } = new URL(request.url)
     const track_id = searchParams.get('track_id')
 
@@ -212,9 +212,9 @@ export async function PUT(
 ) {
   const logger = createLogger('api:playlists:[id]:tracks:reorder')
   const startTime = Date.now()
+  const { id } = await params
 
   try {
-    const { id } = await params
     const body = await request.json()
     
     // Validate request body using Zod schema
