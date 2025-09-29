@@ -1,5 +1,6 @@
 'use client'
 
+import { memo, useMemo, useCallback } from 'react'
 import { Play, Pause, Plus, ExternalLink } from 'lucide-react'
 import { Track } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
@@ -15,19 +16,42 @@ interface TrackCardProps {
   onAddToPlaylist?: (track: Track) => void
 }
 
-export default function TrackCard({ 
-  track, 
-  isPlaying = false, 
-  onPlay, 
-  onPause, 
-  onAddToPlaylist 
+const TrackCard = memo(function TrackCard({
+  track,
+  isPlaying = false,
+  onPlay,
+  onPause,
+  onAddToPlaylist
 }: TrackCardProps) {
   const { user } = useAuth()
-  const formatDuration = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
+
+  // Memoize the formatted duration to avoid recalculation on every render
+  const formattedDuration = useMemo(() => {
+    const mins = Math.floor(track.duration / 60)
+    const secs = track.duration % 60
     return `${mins}:${secs.toString().padStart(2, '0')}`
-  }
+  }, [track.duration])
+
+  // Memoize the play/pause handler to prevent unnecessary re-renders
+  const handlePlayPause = useCallback(() => {
+    if (isPlaying) {
+      onPause()
+    } else {
+      onPlay(track)
+    }
+  }, [isPlaying, onPlay, onPause, track])
+
+  // Memoize the add to playlist handler
+  const handleAddToPlaylist = useCallback(() => {
+    if (onAddToPlaylist) {
+      onAddToPlaylist(track)
+    }
+  }, [onAddToPlaylist, track])
+
+  // Memoize Spotify URL validation to avoid recalculating
+  const isValidSpotifyUrl = useMemo(() => {
+    return track.spotify_url ? validateSpotifyUrl(track.spotify_url) : false
+  }, [track.spotify_url])
 
   return (
     <Card className="hover:shadow-md transition-shadow">
@@ -36,9 +60,10 @@ export default function TrackCard({
           {/* Play Button - Only show if YouTube URL is available */}
           {track.youtube_url && (
             <Button
-              onClick={() => isPlaying ? onPause() : onPlay(track)}
+              onClick={handlePlayPause}
               size="icon"
               className="flex-shrink-0 w-10 h-10 rounded-full"
+              aria-label={isPlaying ? `Pause ${track.title} by ${track.artist}` : `Play ${track.title} by ${track.artist}`}
             >
               {isPlaying ? (
                 <Pause className="h-5 w-5" />
@@ -59,7 +84,7 @@ export default function TrackCard({
             <div className="flex items-center space-x-2 mt-1">
               <span className="text-xs text-muted-foreground">{track.genre}</span>
               <span className="text-xs text-muted-foreground/60">•</span>
-              <span className="text-xs text-muted-foreground">{formatDuration(track.duration)}</span>
+              <span className="text-xs text-muted-foreground">{formattedDuration}</span>
             </div>
           </div>
 
@@ -73,6 +98,7 @@ export default function TrackCard({
                 rel="noopener noreferrer"
                 className="flex-shrink-0 p-2 text-muted-foreground hover:text-red-600 transition-colors group relative"
                 title="Listen on YouTube (opens in new tab)"
+                aria-label={`Listen to ${track.title} by ${track.artist} on YouTube`}
               >
                 <div className="flex items-center space-x-1">
                   <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
@@ -84,13 +110,14 @@ export default function TrackCard({
             )}
 
             {/* Spotify Link - Only show if URL is valid */}
-            {track.spotify_url && validateSpotifyUrl(track.spotify_url) && (
+            {track.spotify_url && isValidSpotifyUrl && (
               <a
                 href={track.spotify_url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-shrink-0 p-2 text-muted-foreground hover:text-green-600 transition-colors group relative"
                 title="Listen on Spotify (opens in new tab)"
+                aria-label={`Listen to ${track.title} by ${track.artist} on Spotify`}
               >
                 <div className="flex items-center space-x-1">
                   <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
@@ -105,11 +132,12 @@ export default function TrackCard({
           {/* Add to Playlist Button */}
           {onAddToPlaylist && user && (
             <Button
-              onClick={() => onAddToPlaylist(track)}
+              onClick={handleAddToPlaylist}
               variant="ghost"
               size="icon"
               className="flex-shrink-0"
               title="Add to playlist"
+              aria-label={`Add ${track.title} by ${track.artist} to playlist`}
             >
               <Plus className="h-4 w-4" />
             </Button>
@@ -118,4 +146,26 @@ export default function TrackCard({
       </CardContent>
     </Card>
   )
+})
+
+// Custom comparison function for React.memo optimization
+// Only re-render if essential props change
+const arePropsEqual = (prevProps: TrackCardProps, nextProps: TrackCardProps) => {
+  return (
+    prevProps.track.id === nextProps.track.id &&
+    prevProps.track.title === nextProps.track.title &&
+    prevProps.track.artist === nextProps.track.artist &&
+    prevProps.track.duration === nextProps.track.duration &&
+    prevProps.track.youtube_url === nextProps.track.youtube_url &&
+    prevProps.track.spotify_url === nextProps.track.spotify_url &&
+    prevProps.isPlaying === nextProps.isPlaying &&
+    // Note: We don't compare functions as they might change reference but do same thing
+    Boolean(prevProps.onAddToPlaylist) === Boolean(nextProps.onAddToPlaylist)
+  )
 }
+
+// Apply the custom comparison
+const MemoizedTrackCard = memo(TrackCard, arePropsEqual)
+MemoizedTrackCard.displayName = 'TrackCard'
+
+export default MemoizedTrackCard

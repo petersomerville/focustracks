@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { TrackSubmission, supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
+import type { TrackSubmission as _TrackSubmission } from '@/lib/supabase'
 import { validateTrackSubmission } from '@/lib/utils'
 
 export async function POST(request: NextRequest) {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Header from '@/components/Header'
 import ProtectedRoute from '@/components/ProtectedRoute'
@@ -28,9 +28,9 @@ export default function PlaylistDetailPage() {
     if (playlistId) {
       fetchPlaylist()
     }
-  }, [playlistId])
+  }, [playlistId, fetchPlaylist])
 
-  const fetchPlaylist = async () => {
+  const fetchPlaylist = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -48,7 +48,7 @@ export default function PlaylistDetailPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [playlistId])
 
   const handleRemoveTrack = async (trackId: string) => {
     if (!playlist) return

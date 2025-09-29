@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Playlist } from '@/lib/supabase'
 import { MOCK_PLAYLISTS, addPlaylist, getNextPlaylistId } from '@/lib/mockData'
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // For Phase 2, return mock playlists for demo user
     // In real implementation, this would check authentication

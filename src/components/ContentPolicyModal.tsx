@@ -88,7 +88,7 @@ export default function ContentPolicyModal() {
                 <h4 className="font-medium mb-2">Copyright Issues</h4>
                 <ul className="list-disc list-inside text-sm space-y-1 text-muted-foreground">
                   <li>Copyrighted music without clear licensing</li>
-                  <li>Unofficial uploads or "bootleg" versions</li>
+                  <li>Unofficial uploads or &quot;bootleg&quot; versions</li>
                   <li>Content with active copyright disputes</li>
                   <li>Remix or cover versions without proper rights</li>
                 </ul>
@@ -135,8 +135,8 @@ export default function ContentPolicyModal() {
             <div className="bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-md p-4">
               <ul className="list-disc list-inside text-sm space-y-2">
                 <li><strong>Quality over quantity:</strong> We prefer fewer high-quality submissions</li>
-                <li><strong>Respect copyright:</strong> When in doubt, don't submit copyrighted content</li>
-                <li><strong>Focus-first:</strong> Ask yourself: "Would this help me concentrate?"</li>
+                <li><strong>Respect copyright:</strong> When in doubt, don&apos;t submit copyrighted content</li>
+                <li><strong>Focus-first:</strong> Ask yourself: &quot;Would this help me concentrate?&quot;</li>
                 <li><strong>Be patient:</strong> Review process may take 1-3 business days</li>
                 <li><strong>Community benefit:</strong> Consider how your submission helps other users</li>
               </ul>
@@ -149,20 +149,20 @@ export default function ContentPolicyModal() {
               <div className="bg-green-50 border border-green-200 rounded-md p-3">
                 <h4 className="font-medium text-green-800 mb-1">✅ Good Example</h4>
                 <p className="text-green-700">
-                  <strong>Title:</strong> "Rain Sounds for Deep Focus"<br/>
-                  <strong>Artist:</strong> "Nature Sounds Co"<br/>
+                  <strong>Title:</strong> &quot;Rain Sounds for Deep Focus&quot;<br/>
+                  <strong>Artist:</strong> &quot;Nature Sounds Co&quot;<br/>
                   <strong>Duration:</strong> 45 minutes<br/>
-                  <strong>Description:</strong> "Gentle rain sounds perfect for studying and concentration. No music, just pure nature audio."
+                  <strong>Description:</strong> &quot;Gentle rain sounds perfect for studying and concentration. No music, just pure nature audio.&quot;
                 </p>
               </div>
 
               <div className="bg-red-50 border border-red-200 rounded-md p-3">
                 <h4 className="font-medium text-red-800 mb-1">❌ Poor Example</h4>
                 <p className="text-red-700">
-                  <strong>Title:</strong> "Epic Gaming Music Mix"<br/>
-                  <strong>Artist:</strong> "Random User"<br/>
+                  <strong>Title:</strong> &quot;Epic Gaming Music Mix&quot;<br/>
+                  <strong>Artist:</strong> &quot;Random User&quot;<br/>
                   <strong>Duration:</strong> 3 minutes<br/>
-                  <strong>Description:</strong> "Cool music"
+                  <strong>Description:</strong> &quot;Cool music&quot;
                 </p>
               </div>
             </div>
