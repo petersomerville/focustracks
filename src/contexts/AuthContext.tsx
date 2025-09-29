@@ -23,12 +23,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logger = createLogger('AuthContext')
 
   const fetchUserRole = useCallback(async (userId: string): Promise<'user' | 'admin'> => {
-    // Skip role fetching for now to prevent blocking the app
-    // This is a temporary workaround until Supabase configuration is fixed
-    logger.info('Skipping user role fetch due to Supabase configuration issues, defaulting to user', { userId })
-    return 'user'
-
-    /* Commented out until Supabase is properly configured
     try {
       logger.debug('Fetching role for user ID', { userId })
       const { data, error } = await supabase
@@ -61,7 +55,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       return 'user'
     }
-    */
   }, [logger])
 
   useEffect(() => {

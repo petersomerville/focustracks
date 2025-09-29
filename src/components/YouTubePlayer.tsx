@@ -172,6 +172,10 @@ export default function YouTubePlayer({
         })
         try {
           player.loadVideoById(videoId)
+          // If isPlaying is true when track loads, start playing
+          if (isPlaying) {
+            player.playVideo()
+          }
         } catch (error) {
           logger.error('Failed to load YouTube video', error instanceof Error ? error : String(error), {
             videoId,
@@ -186,7 +190,7 @@ export default function YouTubePlayer({
         })
       }
     }
-  }, [player, track])
+  }, [player, track, isPlaying])
 
   // Control playback
   useEffect(() => {
