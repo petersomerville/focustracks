@@ -1,5 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen } from '@testing-library/react'
+jest.mock('@/lib/logger', () => ({
+  createLogger: () => ({
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    apiRequest: jest.fn(),
+    apiResponse: jest.fn(),
+    dbQuery: jest.fn(),
+    userAction: jest.fn(),
+    performance: jest.fn(),
+  })
+}))
 import YouTubePlayer from '@/components/YouTubePlayer'
 import type { Track } from '@/lib/supabase'
 
@@ -175,9 +188,6 @@ describe('YouTubePlayer', () => {
       youtube_url: 'https://not-youtube.com/invalid',
     }
 
-    // Spy on console.error to check error handling
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
-
     render(
       <YouTubePlayer
         track={trackWithInvalidUrl}
@@ -186,10 +196,8 @@ describe('YouTubePlayer', () => {
       />
     )
 
-    // Should still render the container but log an error
+    // Should still render the container
     expect(screen.getByTestId('youtube-player-container')).toBeInTheDocument()
-
-    consoleSpy.mockRestore()
   })
 
   it('updates volume when volume prop changes', () => {

@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import type { TrackSubmission as _TrackSubmission } from '@/lib/supabase'
 import { validateTrackSubmission } from '@/lib/utils'
+import { createLogger } from '@/lib/logger'
 
 export async function POST(request: NextRequest) {
+  const logger = createLogger('api:submissions')
   try {
     const authHeader = request.headers.get('authorization')
     if (!authHeader) {
@@ -54,7 +56,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Database error:', error)
+      logger.error('Database error creating submission', error)
       return NextResponse.json({ error: 'Failed to submit track' }, { status: 500 })
     }
 
@@ -63,12 +65,13 @@ export async function POST(request: NextRequest) {
       submission: data
     })
   } catch (error) {
-    console.error('Unexpected error:', error)
+    logger.error('Unexpected error creating submission', error instanceof Error ? error : String(error))
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
 export async function GET(request: NextRequest) {
+  const logger = createLogger('api:submissions')
   try {
     const authHeader = request.headers.get('authorization')
     if (!authHeader) {
@@ -113,13 +116,13 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query
 
     if (error) {
-      console.error('Database error:', error)
+      logger.error('Database error fetching submissions', error)
       return NextResponse.json({ error: 'Failed to fetch submissions' }, { status: 500 })
     }
 
     return NextResponse.json({ submissions: data })
   } catch (error) {
-    console.error('Unexpected error:', error)
+    logger.error('Unexpected error fetching submissions', error instanceof Error ? error : String(error))
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

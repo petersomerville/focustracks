@@ -43,3 +43,29 @@ const localStorageMock = {
   clear: jest.fn(),
 }
 global.localStorage = localStorageMock
+
+// Mock structured logger to keep test output clean
+jest.mock('@/lib/logger', () => ({
+  createLogger: () => ({
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    apiRequest: jest.fn(),
+    apiResponse: jest.fn(),
+    dbQuery: jest.fn(),
+    userAction: jest.fn(),
+    performance: jest.fn(),
+  }),
+  logger: {
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    apiRequest: jest.fn(),
+    apiResponse: jest.fn(),
+    dbQuery: jest.fn(),
+    userAction: jest.fn(),
+    performance: jest.fn(),
+  }
+}))

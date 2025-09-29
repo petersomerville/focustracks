@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { X, Mail, Lock, Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
+import { createLogger } from '@/lib/logger'
 
 interface AuthModalProps {
   isOpen: boolean
@@ -11,6 +12,7 @@ interface AuthModalProps {
 }
 
 export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalProps) {
+  const logger = createLogger('AuthModal')
   const [mode, setMode] = useState<'login' | 'signup'>(initialMode)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -89,7 +91,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
         }
       }
     } catch (err) {
-      console.error('Auth error:', err)
+      logger.error('Auth error', err instanceof Error ? err : String(err))
       setError('An unexpected error occurred')
     } finally {
       setLoading(false)

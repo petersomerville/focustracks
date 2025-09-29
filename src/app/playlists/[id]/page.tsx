@@ -8,8 +8,10 @@ import TrackCard from '@/components/TrackCard'
 import YouTubePlayer from '@/components/YouTubePlayer'
 import { Track, Playlist } from '@/lib/supabase'
 import { ArrowLeft, Trash2, Music } from 'lucide-react'
+import { createLogger } from '@/lib/logger'
 
 export default function PlaylistDetailPage() {
+  const logger = createLogger('PlaylistDetailPage')
   const params = useParams()
   const router = useRouter()
   const playlistId = params.id as string
@@ -79,7 +81,7 @@ export default function PlaylistDetailPage() {
         alert(error.error || 'Failed to remove track from playlist')
       }
     } catch (error) {
-      console.error('Error removing track:', error)
+      logger.error('Error removing track from playlist', error instanceof Error ? error : String(error))
       alert('Failed to remove track from playlist')
     } finally {
       setDeletingTrack(null)
