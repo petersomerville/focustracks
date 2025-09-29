@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { MOCK_PLAYLISTS, MOCK_PLAYLIST_TRACKS, removePlaylist } from '@/lib/mockData'
+import { MOCK_PLAYLISTS, MOCK_PLAYLIST_TRACKS, removePlaylist, updatePlaylist } from '@/lib/mockData'
 import { Track } from '@/lib/supabase'
 import { createLogger } from '@/lib/logger'
-import { createErrorResponse } from '@/lib/api-schemas'
+import { createErrorResponse, formatZodErrors, updatePlaylistSchema } from '@/lib/api-schemas'
 
 export async function GET(
   request: NextRequest,
@@ -41,6 +41,51 @@ export async function GET(
     })
   } catch (error) {
     logger.error('Unexpected error fetching playlist', error instanceof Error ? error : String(error))
+    return NextResponse.json(
+      createErrorResponse('Internal server error', 'An unexpected error occurred', 'INTERNAL_ERROR'),
+      { status: 500 }
+    )
+  }
+}
+
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const logger = createLogger('api:playlists:[id]:update')
+  try {
+    const { id } = await params
+    const body = await request.json()
+    
+    // Validate request body using Zod schema
+    const validation = updatePlaylistSchema.safeParse(body)
+    if (!validation.success) {
+      logger.warn('Invalid playlist update request', {
+        errors: validation.error.issues
+      })
+      return NextResponse.json(
+        formatZodErrors(validation.error),
+        { status: 400 }
+      )
+    }
+
+    const { name } = validation.data
+
+    // Find playlist
+    const playlist = MOCK_PLAYLISTS.find(p => p.id === id)
+
+    if (!playlist) {
+      return NextResponse.json(
+        createErrorResponse('Playlist not found', 'The requested playlist does not exist', 'NOT_FOUND'),
+        { status: 404 }
+      )
+    }
+
+    // Update playlist
+    const updatedPlaylist = updatePlaylist(id, { name: name.trim() })
+    return NextResponse.json({ playlist: updatedPlaylist })
+  } catch (error) {
+    logger.error('Unexpected error updating playlist', error instanceof Error ? error : String(error))
     return NextResponse.json(
       createErrorResponse('Internal server error', 'An unexpected error occurred', 'INTERNAL_ERROR'),
       { status: 500 }

@@ -1,19 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PlaylistTrack } from '@/lib/supabase'
-import {
-  MOCK_PLAYLIST_TRACKS,
-  addPlaylistTrack,
-  removePlaylistTrack,
-  getNextPlaylistTrackId
-} from '@/lib/mockData'
+import { MOCK_PLAYLISTS, MOCK_PLAYLIST_TRACKS, addTrackToPlaylist, removeTrackFromPlaylist, reorderPlaylistTracks } from '@/lib/mockData'
 import { createLogger } from '@/lib/logger'
-import { addTrackToPlaylistSchema, createErrorResponse, formatZodErrors } from '@/lib/api-schemas'
+import { createErrorResponse, formatZodErrors, addTrackToPlaylistSchema } from '@/lib/api-schemas'
+import { z } from 'zod'
+
+const logger = createLogger('api:playlists:[id]:tracks')
+
+// Schema for reordering tracks
+const reorderTracksSchema = z.object({
+  track_id: z.string().uuid('Must be a valid track ID'),
+  new_position: z.number().min(0, 'Position must be non-negative'),
+})
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const logger = createLogger('api:playlists:[id]:tracks')
+  const logger = createLogger('api:playlists:[id]:tracks:add')
   try {
     const { id } = await params
     const body = await request.json()
@@ -21,7 +24,7 @@ export async function POST(
     // Validate request body using Zod schema
     const validation = addTrackToPlaylistSchema.safeParse(body)
     if (!validation.success) {
-      logger.warn('Invalid add track to playlist request', {
+      logger.warn('Invalid add track request', {
         errors: validation.error.issues
       })
       return NextResponse.json(
@@ -30,37 +33,33 @@ export async function POST(
       )
     }
 
-    const { track_id: trackId } = validation.data
+    const { track_id } = validation.data
+
+    // Find playlist
+    const playlist = MOCK_PLAYLISTS.find(p => p.id === id)
+
+    if (!playlist) {
+      return NextResponse.json(
+        createErrorResponse('Playlist not found', 'The requested playlist does not exist', 'NOT_FOUND'),
+        { status: 404 }
+      )
+    }
 
     // Check if track is already in playlist
     const existingTrack = MOCK_PLAYLIST_TRACKS.find(
-      pt => pt.playlist_id === id && pt.track_id === trackId
+      pt => pt.playlist_id === id && pt.track_id === track_id
     )
 
     if (existingTrack) {
       return NextResponse.json(
         createErrorResponse('Track already in playlist', 'This track is already in the playlist', 'DUPLICATE_TRACK'),
-        { status: 400 }
+        { status: 409 }
       )
     }
 
-    // Get next position
-    const playlistTracks = MOCK_PLAYLIST_TRACKS.filter(pt => pt.playlist_id === id)
-    const nextPosition = playlistTracks.length > 0
-      ? Math.max(...playlistTracks.map(pt => pt.position)) + 1
-      : 1
-
-    // Create new playlist track
-    const newPlaylistTrack: PlaylistTrack = {
-      id: getNextPlaylistTrackId(),
-      playlist_id: id,
-      track_id: trackId,
-      position: nextPosition
-    }
-
-    addPlaylistTrack(newPlaylistTrack)
-
-    return NextResponse.json({ playlistTrack: newPlaylistTrack })
+    // Add track to playlist
+    const playlistTrack = addTrackToPlaylist(id, track_id)
+    return NextResponse.json({ playlistTrack })
   } catch (error) {
     logger.error('Unexpected error adding track to playlist', error instanceof Error ? error : String(error))
     return NextResponse.json(
@@ -74,34 +73,43 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const logger = createLogger('api:playlists:[id]:tracks:delete')
+  const logger = createLogger('api:playlists:[id]:tracks:remove')
   try {
     const { id } = await params
     const { searchParams } = new URL(request.url)
-    const trackId = searchParams.get('trackId')
+    const track_id = searchParams.get('track_id')
 
-    if (!trackId) {
+    if (!track_id) {
       return NextResponse.json(
-        createErrorResponse('Track ID is required', 'trackId query parameter is missing', 'MISSING_PARAMETER'),
+        createErrorResponse('Track ID required', 'track_id query parameter is required', 'MISSING_PARAMETER'),
         { status: 400 }
       )
     }
 
-    // Find the playlist track to ensure it exists
-    const existingTrack = MOCK_PLAYLIST_TRACKS.find(
-      pt => pt.playlist_id === id && pt.track_id === trackId
-    )
+    // Find playlist
+    const playlist = MOCK_PLAYLISTS.find(p => p.id === id)
 
-    if (!existingTrack) {
+    if (!playlist) {
       return NextResponse.json(
-        createErrorResponse('Track not found in playlist', 'The specified track is not in this playlist', 'NOT_FOUND'),
+        createErrorResponse('Playlist not found', 'The requested playlist does not exist', 'NOT_FOUND'),
         { status: 404 }
       )
     }
 
-    // Remove the playlist track
-    removePlaylistTrack(id, trackId)
+    // Check if track is in playlist
+    const existingTrack = MOCK_PLAYLIST_TRACKS.find(
+      pt => pt.playlist_id === id && pt.track_id === track_id
+    )
 
+    if (!existingTrack) {
+      return NextResponse.json(
+        createErrorResponse('Track not in playlist', 'This track is not in the playlist', 'TRACK_NOT_FOUND'),
+        { status: 404 }
+      )
+    }
+
+    // Remove track from playlist
+    removeTrackFromPlaylist(id, track_id)
     return NextResponse.json({ success: true })
   } catch (error) {
     logger.error('Unexpected error removing track from playlist', error instanceof Error ? error : String(error))
@@ -112,4 +120,59 @@ export async function DELETE(
   }
 }
 
-// Note: Mock data is now managed in /lib/mockData.ts for shared access
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const logger = createLogger('api:playlists:[id]:tracks:reorder')
+  try {
+    const { id } = await params
+    const body = await request.json()
+    
+    // Validate request body using Zod schema
+    const validation = reorderTracksSchema.safeParse(body)
+    if (!validation.success) {
+      logger.warn('Invalid reorder tracks request', {
+        errors: validation.error.issues
+      })
+      return NextResponse.json(
+        formatZodErrors(validation.error),
+        { status: 400 }
+      )
+    }
+
+    const { track_id, new_position } = validation.data
+
+    // Find playlist
+    const playlist = MOCK_PLAYLISTS.find(p => p.id === id)
+
+    if (!playlist) {
+      return NextResponse.json(
+        createErrorResponse('Playlist not found', 'The requested playlist does not exist', 'NOT_FOUND'),
+        { status: 404 }
+      )
+    }
+
+    // Check if track is in playlist
+    const existingTrack = MOCK_PLAYLIST_TRACKS.find(
+      pt => pt.playlist_id === id && pt.track_id === track_id
+    )
+
+    if (!existingTrack) {
+      return NextResponse.json(
+        createErrorResponse('Track not in playlist', 'This track is not in the playlist', 'TRACK_NOT_FOUND'),
+        { status: 404 }
+      )
+    }
+
+    // Reorder track in playlist
+    const updatedPlaylistTracks = reorderPlaylistTracks(id, track_id, new_position)
+    return NextResponse.json({ playlistTracks: updatedPlaylistTracks })
+  } catch (error) {
+    logger.error('Unexpected error reordering tracks in playlist', error instanceof Error ? error : String(error))
+    return NextResponse.json(
+      createErrorResponse('Internal server error', 'An unexpected error occurred', 'INTERNAL_ERROR'),
+      { status: 500 }
+    )
+  }
+}

@@ -7,7 +7,7 @@ import ProtectedRoute from '@/components/ProtectedRoute'
 import TrackCard from '@/components/TrackCard'
 import YouTubePlayer from '@/components/YouTubePlayer'
 import { Track, Playlist } from '@/lib/supabase'
-import { ArrowLeft, Trash2, Music } from 'lucide-react'
+import { ArrowLeft, Trash2, Music, Shuffle, Repeat } from 'lucide-react'
 import { createLogger } from '@/lib/logger'
 
 export default function PlaylistDetailPage() {
@@ -25,6 +25,8 @@ export default function PlaylistDetailPage() {
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [volume, setVolume] = useState(50)
+  const [currentTrackIndex, setCurrentTrackIndex] = useState<number>(-1)
+  const [playlistMode, setPlaylistMode] = useState<'single' | 'sequential'>('single')
 
   const fetchPlaylist = useCallback(async () => {
     try {
@@ -89,7 +91,9 @@ export default function PlaylistDetailPage() {
   }
 
   const handlePlay = (track: Track) => {
+    const trackIndex = playlist?.tracks.findIndex(t => t.id === track.id) ?? -1
     setCurrentTrack(track)
+    setCurrentTrackIndex(trackIndex)
     setIsPlaying(true)
   }
 
@@ -102,11 +106,34 @@ export default function PlaylistDetailPage() {
   }
 
   const handleSkipBack = () => {
-    // YouTube player will handle this
+    if (!playlist || currentTrackIndex <= 0) return
+    
+    const prevTrack = playlist.tracks[currentTrackIndex - 1]
+    setCurrentTrack(prevTrack)
+    setCurrentTrackIndex(currentTrackIndex - 1)
+    setIsPlaying(true)
   }
 
   const handleSkipForward = () => {
-    // YouTube player will handle this
+    if (!playlist || currentTrackIndex >= playlist.tracks.length - 1) return
+    
+    const nextTrack = playlist.tracks[currentTrackIndex + 1]
+    setCurrentTrack(nextTrack)
+    setCurrentTrackIndex(currentTrackIndex + 1)
+    setIsPlaying(true)
+  }
+
+  const handleTrackEnd = () => {
+    if (playlistMode === 'sequential' && playlist && currentTrackIndex < playlist.tracks.length - 1) {
+      // Auto-play next track in sequential mode
+      const nextTrack = playlist.tracks[currentTrackIndex + 1]
+      setCurrentTrack(nextTrack)
+      setCurrentTrackIndex(currentTrackIndex + 1)
+      setIsPlaying(true)
+    } else {
+      // Stop playback at end of playlist or in single mode
+      setIsPlaying(false)
+    }
   }
 
   const handleVolumeChange = (newVolume: number) => {
@@ -165,6 +192,34 @@ export default function PlaylistDetailPage() {
                       </p>
                     </div>
                   </div>
+                  
+                  {/* Playlist Mode Toggle */}
+                  {playlist.tracks.length > 0 && (
+                    <div className="flex items-center space-x-2">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Playback:</span>
+                      <button
+                        onClick={() => setPlaylistMode(playlistMode === 'single' ? 'sequential' : 'single')}
+                        className={`flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                          playlistMode === 'sequential'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                        }`}
+                        title={playlistMode === 'single' ? 'Switch to sequential playback' : 'Switch to single track playback'}
+                      >
+                        {playlistMode === 'sequential' ? (
+                          <>
+                            <Repeat className="h-4 w-4" />
+                            <span>Sequential</span>
+                          </>
+                        ) : (
+                          <>
+                            <Music className="h-4 w-4" />
+                            <span>Single</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -230,6 +285,7 @@ export default function PlaylistDetailPage() {
             onSkipForward={handleSkipForward}
             onVolumeChange={handleVolumeChange}
             volume={volume}
+            onTrackEnd={handleTrackEnd}
           />
         )}
       </div>
