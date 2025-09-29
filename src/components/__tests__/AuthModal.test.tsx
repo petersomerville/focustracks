@@ -48,7 +48,7 @@ describe('AuthModal', () => {
     )
 
     expect(screen.getByRole('dialog')).toBeInTheDocument()
-    expect(screen.getByText('Sign In')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Sign In' })).toBeInTheDocument()
     expect(screen.getByPlaceholderText('Enter your email')).toBeInTheDocument()
     expect(screen.getByPlaceholderText('Enter your password')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument()
@@ -63,7 +63,7 @@ describe('AuthModal', () => {
       />
     )
 
-    expect(screen.getByText('Create Account')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Create Account' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /create account/i })).toBeInTheDocument()
   })
 
@@ -78,23 +78,23 @@ describe('AuthModal', () => {
       />
     )
 
-    expect(screen.getByText('Sign In')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Sign In' })).toBeInTheDocument()
 
     // Switch to signup
-    const signupLink = screen.getByText(/don't have an account/i).closest('button')
-    if (signupLink) {
-      await user.click(signupLink)
-    }
+    const signupButton = screen.getByRole('button', { name: 'Sign up' })
+    await user.click(signupButton)
 
-    expect(screen.getByText('Create Account')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Create Account' })).toBeInTheDocument()
+    })
 
     // Switch back to login
-    const loginLink = screen.getByText(/already have an account/i).closest('button')
-    if (loginLink) {
-      await user.click(loginLink)
-    }
+    const loginButton = screen.getByRole('button', { name: 'Sign in' })
+    await user.click(loginButton)
 
-    expect(screen.getByText('Sign In')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Sign In' })).toBeInTheDocument()
+    })
   })
 
   it('calls onClose when close button is clicked', async () => {
@@ -152,10 +152,12 @@ describe('AuthModal', () => {
 
     const emailInput = screen.getByPlaceholderText('Enter your email')
     const passwordInput = screen.getByPlaceholderText('Enter your password')
+    const confirmPasswordInput = screen.getByPlaceholderText('Confirm your password')
     const submitButton = screen.getByRole('button', { name: /create account/i })
 
     await user.type(emailInput, 'test@example.com')
     await user.type(passwordInput, 'password123')
+    await user.type(confirmPasswordInput, 'password123')
     await user.click(submitButton)
 
     await waitFor(() => {
@@ -225,7 +227,7 @@ describe('AuthModal', () => {
     )
 
     const passwordInput = screen.getByPlaceholderText('Enter your password') as HTMLInputElement
-    const toggleButton = screen.getByRole('button', { name: /toggle password visibility/i })
+    const toggleButton = screen.getByRole('button', { name: /show password/i })
 
     // Initially password should be hidden
     expect(passwordInput.type).toBe('password')
