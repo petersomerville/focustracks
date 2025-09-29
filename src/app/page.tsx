@@ -129,7 +129,7 @@ export default function Home() {
         {/* Tracks Grid */}
         {!loading && !error && (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {tracks.length > 0 ? (
+            {tracks && tracks.length > 0 ? (
               tracks.map((track) => (
                 <TrackCard
                   key={track.id}

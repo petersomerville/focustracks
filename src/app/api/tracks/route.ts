@@ -54,7 +54,9 @@ export async function GET(request: NextRequest) {
     }
 
     // Apply pagination
-    query = query.range(offset, offset + limit - 1)
+    if (limit !== undefined) {
+      query = query.range(offset, offset + limit - 1)
+    }
 
     // Sort by created_at descending (newest first)
     query = query.order('created_at', { ascending: false })

@@ -115,7 +115,7 @@ export default function PlaylistDetailPage() {
   }
 
   const handleSkipForward = () => {
-    if (!playlist || currentTrackIndex >= playlist.tracks.length - 1) return
+    if (!playlist || !playlist.tracks || currentTrackIndex >= playlist.tracks.length - 1) return
     
     const nextTrack = playlist.tracks[currentTrackIndex + 1]
     setCurrentTrack(nextTrack)
@@ -124,7 +124,7 @@ export default function PlaylistDetailPage() {
   }
 
   const handleTrackEnd = () => {
-    if (playlistMode === 'sequential' && playlist && currentTrackIndex < playlist.tracks.length - 1) {
+    if (playlistMode === 'sequential' && playlist && playlist.tracks && currentTrackIndex < playlist.tracks.length - 1) {
       // Auto-play next track in sequential mode
       const nextTrack = playlist.tracks[currentTrackIndex + 1]
       setCurrentTrack(nextTrack)
@@ -185,7 +185,7 @@ export default function PlaylistDetailPage() {
                         {playlist.name}
                       </h1>
                       <p className="text-gray-600 dark:text-gray-400 mt-1">
-                        {playlist.tracks.length} {playlist.tracks.length === 1 ? 'track' : 'tracks'}
+                        {playlist.tracks?.length || 0} {(playlist.tracks?.length || 0) === 1 ? 'track' : 'tracks'}
                       </p>
                       <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
                         Created {new Date(playlist.created_at).toLocaleDateString()}
@@ -194,7 +194,7 @@ export default function PlaylistDetailPage() {
                   </div>
                   
                   {/* Playlist Mode Toggle */}
-                  {playlist.tracks.length > 0 && (
+                  {playlist.tracks && playlist.tracks.length > 0 && (
                     <div className="flex items-center space-x-2">
                       <span className="text-sm text-gray-600 dark:text-gray-400">Playback:</span>
                       <button
@@ -224,7 +224,7 @@ export default function PlaylistDetailPage() {
               </div>
 
               {/* Tracks List */}
-              {playlist.tracks.length > 0 ? (
+              {playlist.tracks && playlist.tracks.length > 0 ? (
                 <div className="space-y-4">
                   <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
                     Tracks
