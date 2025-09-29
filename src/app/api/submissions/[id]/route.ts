@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase'
 import { createClient } from '@supabase/supabase-js'
 import type { Track } from '@/lib/supabase'
 import { createLogger } from '@/lib/logger'
+import { updateSubmissionSchema, createErrorResponse, formatZodErrors } from '@/lib/api-schemas'
 
 // Function to create admin client with service role for bypassing RLS
 function createSupabaseAdmin() {
@@ -52,11 +53,20 @@ export async function PUT(
     }
 
     const body = await request.json()
-    const { status, admin_notes } = body
-
-    if (!['approved', 'rejected'].includes(status)) {
-      return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
+    
+    // Validate request body using Zod schema
+    const validation = updateSubmissionSchema.safeParse(body)
+    if (!validation.success) {
+      logger.warn('Invalid submission update request', {
+        errors: validation.error.issues
+      })
+      return NextResponse.json(
+        formatZodErrors(validation.error),
+        { status: 400 }
+      )
     }
+
+    const { status, admin_notes } = validation.data
 
     const { data: submission, error: fetchError } = await supabase
       .from('track_submissions')
@@ -65,11 +75,17 @@ export async function PUT(
       .single()
 
     if (fetchError || !submission) {
-      return NextResponse.json({ error: 'Submission not found' }, { status: 404 })
+      return NextResponse.json(
+        createErrorResponse('Submission not found', 'The requested submission does not exist', 'NOT_FOUND'),
+        { status: 404 }
+      )
     }
 
     if (submission.status !== 'pending') {
-      return NextResponse.json({ error: 'Submission already processed' }, { status: 400 })
+      return NextResponse.json(
+        createErrorResponse('Submission already processed', 'This submission has already been reviewed', 'ALREADY_PROCESSED'),
+        { status: 400 }
+      )
     }
 
     const { data, error } = await supabase
@@ -85,7 +101,10 @@ export async function PUT(
 
     if (error) {
       logger.error('Database error updating submission', error)
-      return NextResponse.json({ error: 'Failed to update submission' }, { status: 500 })
+      return NextResponse.json(
+        createErrorResponse('Failed to update submission', 'Database error occurred', 'DATABASE_ERROR'),
+        { status: 500 }
+      )
     }
 
     if (status === 'approved') {
@@ -116,10 +135,10 @@ export async function PUT(
 
       if (trackError) {
         logger.error('Failed to create track from submission', trackError, { trackData })
-        return NextResponse.json({
-          error: 'Submission approved but failed to create track',
-          details: trackError.message
-        }, { status: 500 })
+        return NextResponse.json(
+          createErrorResponse('Submission approved but failed to create track', trackError.message, 'TRACK_CREATION_ERROR'),
+          { status: 500 }
+        )
       }
 
       logger.info('Successfully created track from submission', { trackId: insertedTrack?.[0]?.id })
@@ -131,6 +150,9 @@ export async function PUT(
     })
   } catch (error) {
     logger.error('Unexpected error in submission update', error instanceof Error ? error : String(error))
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json(
+      createErrorResponse('Internal server error', 'An unexpected error occurred', 'INTERNAL_ERROR'),
+      { status: 500 }
+    )
   }
 }
