@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import type { TrackSubmission as _TrackSubmission } from '@/lib/supabase'
-import { validateTrackSubmission } from '@/lib/utils'
+import { createSubmissionSchema, createErrorResponse, formatZodErrors } from '@/lib/api-schemas'
 import { createLogger } from '@/lib/logger'
 
 export async function POST(request: NextRequest) {
@@ -20,24 +20,20 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { title, artist, genre, duration, youtube_url, spotify_url, description } = body
-
-    const validation = validateTrackSubmission({
-      title,
-      artist,
-      genre,
-      duration,
-      youtube_url,
-      spotify_url,
-      description
-    })
-
-    if (!validation.valid) {
-      return NextResponse.json({
-        error: 'Validation failed',
-        details: validation.errors
-      }, { status: 400 })
+    
+    // Validate request body using Zod schema
+    const validation = createSubmissionSchema.safeParse(body)
+    if (!validation.success) {
+      logger.warn('Invalid submission request', {
+        errors: validation.error.issues
+      })
+      return NextResponse.json(
+        formatZodErrors(validation.error),
+        { status: 400 }
+      )
     }
+
+    const { title, artist, genre, duration, youtube_url, spotify_url, description } = validation.data
 
     const { data, error } = await supabase
       .from('track_submissions')
@@ -57,7 +53,10 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       logger.error('Database error creating submission', error)
-      return NextResponse.json({ error: 'Failed to submit track' }, { status: 500 })
+      return NextResponse.json(
+        createErrorResponse('Failed to submit track', 'Database error occurred', 'DATABASE_ERROR'),
+        { status: 500 }
+      )
     }
 
     return NextResponse.json({
@@ -66,7 +65,10 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     logger.error('Unexpected error creating submission', error instanceof Error ? error : String(error))
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json(
+      createErrorResponse('Internal server error', 'An unexpected error occurred', 'INTERNAL_ERROR'),
+      { status: 500 }
+    )
   }
 }
 
@@ -117,12 +119,18 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       logger.error('Database error fetching submissions', error)
-      return NextResponse.json({ error: 'Failed to fetch submissions' }, { status: 500 })
+      return NextResponse.json(
+        createErrorResponse('Failed to fetch submissions', 'Database error occurred', 'DATABASE_ERROR'),
+        { status: 500 }
+      )
     }
 
     return NextResponse.json({ submissions: data })
   } catch (error) {
     logger.error('Unexpected error fetching submissions', error instanceof Error ? error : String(error))
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json(
+      createErrorResponse('Internal server error', 'An unexpected error occurred', 'INTERNAL_ERROR'),
+      { status: 500 }
+    )
   }
 }

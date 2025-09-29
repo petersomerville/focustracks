@@ -6,18 +6,31 @@ import {
   removePlaylistTrack,
   getNextPlaylistTrackId
 } from '@/lib/mockData'
+import { createLogger } from '@/lib/logger'
+import { addTrackToPlaylistSchema, createErrorResponse, formatZodErrors } from '@/lib/api-schemas'
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const logger = createLogger('api:playlists:[id]:tracks')
   try {
     const { id } = await params
-    const { trackId } = await request.json()
-
-    if (!trackId) {
-      return NextResponse.json({ error: 'Track ID is required' }, { status: 400 })
+    const body = await request.json()
+    
+    // Validate request body using Zod schema
+    const validation = addTrackToPlaylistSchema.safeParse(body)
+    if (!validation.success) {
+      logger.warn('Invalid add track to playlist request', {
+        errors: validation.error.issues
+      })
+      return NextResponse.json(
+        formatZodErrors(validation.error),
+        { status: 400 }
+      )
     }
+
+    const { track_id: trackId } = validation.data
 
     // Check if track is already in playlist
     const existingTrack = MOCK_PLAYLIST_TRACKS.find(
@@ -25,7 +38,10 @@ export async function POST(
     )
 
     if (existingTrack) {
-      return NextResponse.json({ error: 'Track already in playlist' }, { status: 400 })
+      return NextResponse.json(
+        createErrorResponse('Track already in playlist', 'This track is already in the playlist', 'DUPLICATE_TRACK'),
+        { status: 400 }
+      )
     }
 
     // Get next position
@@ -46,8 +62,11 @@ export async function POST(
 
     return NextResponse.json({ playlistTrack: newPlaylistTrack })
   } catch (error) {
-    console.error('Unexpected error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    logger.error('Unexpected error adding track to playlist', error instanceof Error ? error : String(error))
+    return NextResponse.json(
+      createErrorResponse('Internal server error', 'An unexpected error occurred', 'INTERNAL_ERROR'),
+      { status: 500 }
+    )
   }
 }
 
@@ -55,13 +74,17 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const logger = createLogger('api:playlists:[id]:tracks:delete')
   try {
     const { id } = await params
     const { searchParams } = new URL(request.url)
     const trackId = searchParams.get('trackId')
 
     if (!trackId) {
-      return NextResponse.json({ error: 'Track ID is required' }, { status: 400 })
+      return NextResponse.json(
+        createErrorResponse('Track ID is required', 'trackId query parameter is missing', 'MISSING_PARAMETER'),
+        { status: 400 }
+      )
     }
 
     // Find the playlist track to ensure it exists
@@ -70,7 +93,10 @@ export async function DELETE(
     )
 
     if (!existingTrack) {
-      return NextResponse.json({ error: 'Track not found in playlist' }, { status: 404 })
+      return NextResponse.json(
+        createErrorResponse('Track not found in playlist', 'The specified track is not in this playlist', 'NOT_FOUND'),
+        { status: 404 }
+      )
     }
 
     // Remove the playlist track
@@ -78,8 +104,11 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Unexpected error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    logger.error('Unexpected error removing track from playlist', error instanceof Error ? error : String(error))
+    return NextResponse.json(
+      createErrorResponse('Internal server error', 'An unexpected error occurred', 'INTERNAL_ERROR'),
+      { status: 500 }
+    )
   }
 }
 
