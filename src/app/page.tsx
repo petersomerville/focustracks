@@ -16,9 +16,9 @@ export default function Home() {
   const [selectedGenre, setSelectedGenre] = useState('All')
   const [searchQuery, setSearchQuery] = useState('')
 
-  const { tracks, loading, error } = useTracks({ 
-    genre: selectedGenre, 
-    search: searchQuery 
+  const { tracks, loading, error } = useTracks({
+    genre: selectedGenre,
+    search: searchQuery
   })
 
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null)

@@ -28,7 +28,7 @@ export function useTracks({ genre, search }: UseTracksOptions = {}) {
           throw new Error(data.error || 'Failed to fetch tracks')
         }
 
-        setTracks(data.tracks)
+        setTracks(data.data?.tracks || [])
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred')
       } finally {

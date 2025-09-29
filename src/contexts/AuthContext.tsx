@@ -22,7 +22,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
   const logger = createLogger('AuthContext')
 
-  const fetchUserRole = useCallback(async (userId: string) => {
+  const fetchUserRole = useCallback(async (userId: string): Promise<'user' | 'admin'> => {
+    // Skip role fetching for now to prevent blocking the app
+    // This is a temporary workaround until Supabase configuration is fixed
+    logger.info('Skipping user role fetch due to Supabase configuration issues, defaulting to user', { userId })
+    return 'user'
+
+    /* Commented out until Supabase is properly configured
     try {
       logger.debug('Fetching role for user ID', { userId })
       const { data, error } = await supabase
@@ -32,16 +38,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single()
 
       if (error) {
-        logger.error('Error fetching user role', error)
+        // If the table doesn't exist or there's a network error, default to 'user'
+        if (error.code === 'PGRST116' || error.message?.includes('relation "public.user_profiles" does not exist')) {
+          logger.warn('user_profiles table does not exist, defaulting to user role', { userId })
+          return 'user'
+        }
+
+        // For other errors (like no matching row), still default to 'user' but log it
+        logger.warn('Could not fetch user role, defaulting to user', { error: error.message, code: error.code })
         return 'user'
       }
 
       logger.debug('Fetched user role', { role: data?.role })
       return data?.role || 'user'
     } catch (error) {
-      logger.error('Error fetching user role', error instanceof Error ? error : String(error))
+      // Handle network errors, CORS issues, etc.
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      if (errorMessage.includes('Failed to fetch') || errorMessage.includes('ERR_INSUFFICIENT_RESOURCES')) {
+        logger.warn('Network error fetching user role, defaulting to user', { error: errorMessage })
+      } else {
+        logger.error('Unexpected error fetching user role', errorMessage)
+      }
       return 'user'
     }
+    */
   }, [logger])
 
   useEffect(() => {
