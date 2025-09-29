@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, useCallback } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react'
 import { User } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { createLogger } from '@/lib/logger'
@@ -21,8 +21,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [userRole, setUserRole] = useState<'user' | 'admin' | null>(null)
   const [loading, setLoading] = useState(true)
   const logger = createLogger('AuthContext')
+  const roleCache = useRef<Map<string, 'user' | 'admin'>>(new Map())
 
   const fetchUserRole = useCallback(async (userId: string): Promise<'user' | 'admin'> => {
+    // Check cache first
+    const cachedRole = roleCache.current.get(userId)
+    if (cachedRole) {
+      logger.debug('Using cached role for user ID', { userId, role: cachedRole })
+      return cachedRole
+    }
+
     try {
       logger.debug('Fetching role for user ID', { userId })
       const { data, error } = await supabase
@@ -43,8 +51,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return 'user'
       }
 
-      logger.debug('Fetched user role', { role: data?.role })
-      return data?.role || 'user'
+      const role = data?.role || 'user'
+      logger.debug('Fetched user role', { role })
+      // Cache the role
+      roleCache.current.set(userId, role)
+      return role
     } catch (error) {
       // Handle network errors, CORS issues, etc.
       const errorMessage = error instanceof Error ? error.message : String(error)
@@ -80,14 +91,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         const currentUser = session?.user ?? null
-        setUser(currentUser)
 
-        if (currentUser) {
-          const role = await fetchUserRole(currentUser.id)
-          setUserRole(role)
-        } else {
-          setUserRole(null)
-        }
+        // Only update user and role if the user actually changed
+        setUser(prevUser => {
+          // If user ID hasn't changed, don't update (prevents re-render)
+          if (prevUser?.id === currentUser?.id) {
+            return prevUser
+          }
+
+          // User changed, update role
+          if (currentUser) {
+            fetchUserRole(currentUser.id).then(role => setUserRole(role))
+          } else {
+            setUserRole(null)
+            roleCache.current.clear()
+          }
+
+          return currentUser
+        })
 
         setLoading(false)
       }
