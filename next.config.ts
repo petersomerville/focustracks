@@ -1,14 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  eslint: {
-    // Disable ESLint during builds to avoid deployment failures
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    // Disable TypeScript errors during builds
-    ignoreBuildErrors: true,
-  },
+  // ESLint and TypeScript errors will now be caught during builds
 };
 
 export default nextConfig;

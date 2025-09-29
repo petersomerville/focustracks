@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import { createClient } from '@supabase/supabase-js'
 import type { Track } from '@/lib/supabase'
+import { createLogger } from '@/lib/logger'
 
 // Function to create admin client with service role for bypassing RLS
 function createSupabaseAdmin() {
@@ -24,6 +25,7 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const logger = createLogger('api:submissions:id')
   try {
     const { id } = await params
 
@@ -82,7 +84,7 @@ export async function PUT(
       .single()
 
     if (error) {
-      console.error('Database error:', error)
+      logger.error('Database error updating submission', error)
       return NextResponse.json({ error: 'Failed to update submission' }, { status: 500 })
     }
 
@@ -104,7 +106,7 @@ export async function PUT(
         trackData.audio_url = submission.spotify_url
       }
 
-      console.log('Inserting track data:', trackData)
+      logger.info('Preparing to insert track from approved submission', { trackTitle: trackData.title, artist: trackData.artist })
 
       const supabaseAdmin = createSupabaseAdmin()
       const { data: insertedTrack, error: trackError } = await supabaseAdmin
@@ -113,15 +115,14 @@ export async function PUT(
         .select()
 
       if (trackError) {
-        console.error('Failed to create track:', trackError)
-        console.error('Track data that failed:', trackData)
+        logger.error('Failed to create track from submission', trackError, { trackData })
         return NextResponse.json({
           error: 'Submission approved but failed to create track',
           details: trackError.message
         }, { status: 500 })
       }
 
-      console.log('Successfully created track:', insertedTrack)
+      logger.info('Successfully created track from submission', { trackId: insertedTrack?.[0]?.id })
     }
 
     return NextResponse.json({
@@ -129,7 +130,7 @@ export async function PUT(
       submission: data
     })
   } catch (error) {
-    console.error('Unexpected error:', error)
+    logger.error('Unexpected error in submission update', error instanceof Error ? error : String(error))
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

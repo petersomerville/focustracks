@@ -17,7 +17,7 @@ const mockTrack: Track = {
   genre: 'Test Genre',
   duration: 180,
   youtube_url: 'https://www.youtube.com/watch?v=testid',
-  spotify_url: 'https://open.spotify.com/track/testid',
+  spotify_url: 'https://open.spotify.com/track/1234567890123456789012',
   created_at: '2023-01-01T00:00:00Z',
 }
 
@@ -124,7 +124,7 @@ describe('TrackCard', () => {
       />
     )
 
-    const youtubeLink = screen.getByRole('link', { name: /listen on youtube/i })
+    const youtubeLink = screen.getByRole('link', { name: /listen to test track by test artist on youtube/i })
     expect(youtubeLink).toHaveAttribute('href', mockTrack.youtube_url)
     expect(youtubeLink).toHaveAttribute('target', '_blank')
   })
@@ -138,7 +138,7 @@ describe('TrackCard', () => {
       />
     )
 
-    const spotifyLink = screen.getByRole('link', { name: /listen on spotify/i })
+    const spotifyLink = screen.getByRole('link', { name: /listen to test track by test artist on spotify/i })
     expect(spotifyLink).toHaveAttribute('href', mockTrack.spotify_url)
     expect(spotifyLink).toHaveAttribute('target', '_blank')
   })
@@ -153,7 +153,7 @@ describe('TrackCard', () => {
       />
     )
 
-    const addButton = screen.getByRole('button', { name: /add to playlist/i })
+    const addButton = screen.getByRole('button', { name: /add test track by test artist to playlist/i })
     expect(addButton).toBeInTheDocument()
 
     fireEvent.click(addButton)
@@ -178,7 +178,7 @@ describe('TrackCard', () => {
       />
     )
 
-    expect(screen.queryByRole('button', { name: /add to playlist/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /add test track by test artist to playlist/i })).not.toBeInTheDocument()
   })
 
   it('formats duration correctly', () => {

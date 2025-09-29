@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { X, Mail, Lock, Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
+import { createLogger } from '@/lib/logger'
 
 interface AuthModalProps {
   isOpen: boolean
@@ -11,6 +12,7 @@ interface AuthModalProps {
 }
 
 export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalProps) {
+  const logger = createLogger('AuthModal')
   const [mode, setMode] = useState<'login' | 'signup'>(initialMode)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -89,7 +91,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
         }
       }
     } catch (err) {
-      console.error('Auth error:', err)
+      logger.error('Auth error', err instanceof Error ? err : String(err))
       setError('An unexpected error occurred')
     } finally {
       setLoading(false)
@@ -100,15 +102,21 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md">
+      <div 
+        className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="auth-modal-title"
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+          <h2 id="auth-modal-title" className="text-xl font-semibold text-gray-900 dark:text-gray-100">
             {mode === 'login' ? 'Sign In' : 'Create Account'}
           </h2>
           <button
             onClick={onClose}
             className="p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+            aria-label="Close modal"
           >
             <X className="h-5 w-5" />
           </button>
@@ -158,6 +166,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
                 disabled={loading}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
@@ -217,7 +226,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
             {loading ? (
               <div className="flex items-center justify-center">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                {mode === 'login' ? 'Signing In...' : 'Creating Account...'}
+                {mode === 'login' ? 'Signing in...' : 'Creating Account...'}
               </div>
             ) : (
               mode === 'login' ? 'Sign In' : 'Create Account'

@@ -8,8 +8,10 @@ import TrackCard from '@/components/TrackCard'
 import YouTubePlayer from '@/components/YouTubePlayer'
 import { Track, Playlist } from '@/lib/supabase'
 import { ArrowLeft, Trash2, Music } from 'lucide-react'
+import { createLogger } from '@/lib/logger'
 
 export default function PlaylistDetailPage() {
+  const logger = createLogger('PlaylistDetailPage')
   const params = useParams()
   const router = useRouter()
   const playlistId = params.id as string
@@ -23,12 +25,6 @@ export default function PlaylistDetailPage() {
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [volume, setVolume] = useState(50)
-
-  useEffect(() => {
-    if (playlistId) {
-      fetchPlaylist()
-    }
-  }, [playlistId, fetchPlaylist])
 
   const fetchPlaylist = useCallback(async () => {
     try {
@@ -49,6 +45,12 @@ export default function PlaylistDetailPage() {
       setLoading(false)
     }
   }, [playlistId])
+
+  useEffect(() => {
+    if (playlistId) {
+      fetchPlaylist()
+    }
+  }, [playlistId, fetchPlaylist])
 
   const handleRemoveTrack = async (trackId: string) => {
     if (!playlist) return
@@ -79,7 +81,7 @@ export default function PlaylistDetailPage() {
         alert(error.error || 'Failed to remove track from playlist')
       }
     } catch (error) {
-      console.error('Error removing track:', error)
+      logger.error('Error removing track from playlist', error instanceof Error ? error : String(error))
       alert('Failed to remove track from playlist')
     } finally {
       setDeletingTrack(null)

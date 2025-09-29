@@ -17,6 +17,7 @@ import { validateTrackSubmission, parseDurationToSeconds } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 import ContentPolicyModal from './ContentPolicyModal'
+import { createLogger } from '@/lib/logger'
 
 interface TrackSubmissionFormProps {
   onSubmissionSuccess?: () => void
@@ -25,6 +26,7 @@ interface TrackSubmissionFormProps {
 
 export default function TrackSubmissionForm({ onSubmissionSuccess, compact = false }: TrackSubmissionFormProps) {
   const { user } = useAuth()
+  const logger = createLogger('TrackSubmissionForm')
   const [isOpen, setIsOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
@@ -119,7 +121,7 @@ export default function TrackSubmissionForm({ onSubmissionSuccess, compact = fal
       setIsOpen(false)
       onSubmissionSuccess?.()
     } catch (error) {
-      console.error('Submission error:', error)
+      logger.error('Submission error', error instanceof Error ? error : String(error))
       if (error instanceof Error) {
         if (error.name === 'AbortError') {
           toast.error('Request timed out. Please try again.')

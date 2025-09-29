@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { createLogger } from '@/lib/logger'
 
 export async function POST(request: NextRequest) {
+  const logger = createLogger('api:auth:register')
   try {
     const { email, password } = await request.json()
 
@@ -20,13 +22,13 @@ export async function POST(request: NextRequest) {
     })
 
     if (error) {
-      console.error('Registration error:', error)
+      logger.error('Registration error', error)
       return NextResponse.json({ error: error.message }, { status: 400 })
     }
 
     return NextResponse.json({ user: data.user })
   } catch (error) {
-    console.error('Unexpected error:', error)
+    logger.error('Unexpected error during registration', error instanceof Error ? error : String(error))
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

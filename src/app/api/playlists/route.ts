@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Playlist } from '@/lib/supabase'
 import { MOCK_PLAYLISTS, addPlaylist, getNextPlaylistId } from '@/lib/mockData'
+import { createLogger } from '@/lib/logger'
 
 export async function GET(_request: NextRequest) {
+  const logger = createLogger('api:playlists')
   try {
     // For Phase 2, return mock playlists for demo user
     // In real implementation, this would check authentication
@@ -10,12 +12,13 @@ export async function GET(_request: NextRequest) {
 
     return NextResponse.json({ playlists: userPlaylists })
   } catch (error) {
-    console.error('Unexpected error:', error)
+    logger.error('Unexpected error fetching playlists', error instanceof Error ? error : String(error))
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
 export async function POST(request: NextRequest) {
+  const logger = createLogger('api:playlists')
   try {
     const { name } = await request.json()
 
@@ -36,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ playlist: newPlaylist })
   } catch (error) {
-    console.error('Unexpected error:', error)
+    logger.error('Unexpected error creating playlist', error instanceof Error ? error : String(error))
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

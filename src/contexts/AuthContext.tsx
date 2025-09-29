@@ -1,8 +1,9 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { User } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
+import { createLogger } from '@/lib/logger'
 
 interface AuthContextType {
   user: User | null
@@ -19,10 +20,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [userRole, setUserRole] = useState<'user' | 'admin' | null>(null)
   const [loading, setLoading] = useState(true)
+  const logger = createLogger('AuthContext')
 
-  const fetchUserRole = async (userId: string) => {
+  const fetchUserRole = useCallback(async (userId: string) => {
     try {
-      console.log('Fetching role for user ID:', userId)
+      logger.debug('Fetching role for user ID', { userId })
       const { data, error } = await supabase
         .from('user_profiles')
         .select('role')
@@ -30,17 +32,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single()
 
       if (error) {
-        console.error('Error fetching user role:', error)
+        logger.error('Error fetching user role', error)
         return 'user'
       }
 
-      console.log('User role data:', data)
+      logger.debug('Fetched user role', { role: data?.role })
       return data?.role || 'user'
     } catch (error) {
-      console.error('Error fetching user role:', error)
+      logger.error('Error fetching user role', error instanceof Error ? error : String(error))
       return 'user'
     }
-  }
+  }, [logger])
 
   useEffect(() => {
     // Get initial session
@@ -79,7 +81,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     )
 
     return () => subscription.unsubscribe()
-  }, [])
+  }, [fetchUserRole])
 
   const signIn = async (email: string, password: string) => {
     try {
@@ -89,7 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
       return { error: error?.message ?? null }
     } catch (error) {
-      console.error('SignIn error:', error)
+      logger.error('SignIn error', error instanceof Error ? error : String(error))
       return { error: 'An unexpected error occurred' }
     }
   }
@@ -102,7 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
       return { error: error?.message ?? null }
     } catch (error) {
-      console.error('SignUp error:', error)
+      logger.error('SignUp error', error instanceof Error ? error : String(error))
       return { error: 'An unexpected error occurred' }
     }
   }

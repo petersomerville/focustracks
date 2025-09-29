@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { X, Plus } from 'lucide-react'
 import { Track, Playlist } from '@/lib/supabase'
+import { createLogger } from '@/lib/logger'
 
 interface PlaylistSelectionModalProps {
   isOpen: boolean
@@ -17,6 +18,7 @@ export default function PlaylistSelectionModal({
   onClose,
   onSuccess
 }: PlaylistSelectionModalProps) {
+  const logger = createLogger('PlaylistSelectionModal')
   const [playlists, setPlaylists] = useState<Playlist[]>([])
   const [loading, setLoading] = useState(false)
   const [addingToPlaylist, setAddingToPlaylist] = useState<string | null>(null)
@@ -24,24 +26,24 @@ export default function PlaylistSelectionModal({
   const [creatingPlaylist, setCreatingPlaylist] = useState(false)
   const [showCreateForm, setShowCreateForm] = useState(false)
 
-  useEffect(() => {
-    if (isOpen) {
-      fetchPlaylists()
-    }
-  }, [isOpen])
-
-  const fetchPlaylists = async () => {
+  const fetchPlaylists = useCallback(async () => {
     try {
       setLoading(true)
       const response = await fetch('/api/playlists')
       const data = await response.json()
       setPlaylists(data.playlists || [])
     } catch (error) {
-      console.error('Error fetching playlists:', error)
+      logger.error('Error fetching playlists', error instanceof Error ? error : String(error))
     } finally {
       setLoading(false)
     }
-  }
+  }, [logger])
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchPlaylists()
+    }
+  }, [isOpen, fetchPlaylists])
 
   const handleAddToPlaylist = async (playlistId: string) => {
     if (!track) return
@@ -66,7 +68,7 @@ export default function PlaylistSelectionModal({
         alert(error.error || 'Failed to add track to playlist')
       }
     } catch (error) {
-      console.error('Error adding track to playlist:', error)
+      logger.error('Error adding track to playlist', error instanceof Error ? error : String(error))
       alert('Failed to add track to playlist')
     } finally {
       setAddingToPlaylist(null)
@@ -103,7 +105,7 @@ export default function PlaylistSelectionModal({
         alert(error.error || 'Failed to create playlist')
       }
     } catch (error) {
-      console.error('Error creating playlist:', error)
+      logger.error('Error creating playlist', error instanceof Error ? error : String(error))
       alert('Failed to create playlist')
     } finally {
       setCreatingPlaylist(false)

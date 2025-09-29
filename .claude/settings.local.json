@@ -8,7 +8,15 @@
       "WebFetch(domain:ui.shadcn.com)",
       "Bash(npx:*)",
       "Bash(npm install:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(npm run lint)",
+      "Bash(npm run build:*)",
+      "Bash(npm test)",
+      "Bash(jobs)",
+      "Bash(npm test:*)",
+      "Bash(cat:*)",
+      "Bash(npm run data:validate:*)",
+      "Bash(npm run test:*)"
     ],
     "deny": [],
     "ask": []

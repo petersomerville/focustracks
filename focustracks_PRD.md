@@ -15,7 +15,7 @@ FocusTracks is a simple web application that demonstrates proficiency with moder
 
 ### 1.2 Product Mission
 
-To create a minimal viable product that demonstrates expertise in React, Next.js, TypeScript, Tailwind CSS, Supabase, Node.js, and Express.js while keeping the feature set simple enough to focus on technical implementation rather than complex product requirements.
+To create a minimal viable product that demonstrates expertise in React, Next.js, TypeScript, Tailwind CSS, Supabase, and Node.js while keeping the feature set simple enough to focus on technical implementation rather than complex product requirements.
 
 ### 1.3 Success Metrics
 
@@ -35,15 +35,15 @@ To create a minimal viable product that demonstrates expertise in React, Next.js
 
 #### 2.2.1 Frontend Technologies
 
-- **React 18**: Component-based architecture, hooks, state management
-- **Next.js 14**: App router, server-side rendering, API routes
+- **React 19.1**: Component-based architecture, hooks, state management, modern features
+- **Next.js 15.5**: App router, server-side rendering, API routes, Turbopack
 - **TypeScript**: Type safety, interfaces, generics
 - **Tailwind CSS**: Utility-first styling, responsive design
 
 #### 2.2.2 Backend Technologies
 
 - **Node.js**: Server-side JavaScript runtime
-- **Express.js**: Web application framework, middleware, routing
+- **Next.js API Routes**: Server-side API endpoints, middleware, routing
 - **Supabase**: Database, authentication, real-time features
 
 #### 2.2.3 Full-Stack Integration
@@ -57,7 +57,7 @@ To create a minimal viable product that demonstrates expertise in React, Next.js
 
 ### 3.1 Primary Goals
 
-1. **Technical Learning**: Master React, Next.js, TypeScript, Tailwind CSS, Supabase, Node.js, and Express.js
+1. **Technical Learning**: Master React, Next.js, TypeScript, Tailwind CSS, Supabase, and Node.js
 2. **Portfolio Demonstration**: Create a clean, well-architected codebase that showcases technical skills
 3. **Simplicity**: Keep features minimal to focus on technical implementation and code quality
 4. **Full-Stack Integration**: Demonstrate end-to-end development capabilities
@@ -149,7 +149,7 @@ To create a minimal viable product that demonstrates expertise in React, Next.js
 
 - **Frontend**: React 19.1, Next.js 15.5, TypeScript 5
 - **Styling**: Tailwind CSS v4
-- **Backend**: Node.js, Express.js
+- **Backend**: Node.js, Next.js API Routes
 - **Database**: Supabase (PostgreSQL)
 - **Authentication**: Supabase Auth
 - **Deployment**: Vercel
@@ -291,8 +291,8 @@ playlist_tracks (
 
 ### 8.3 Learning Objectives
 
-- **React 19 Mastery**: Proper use of hooks, context, and component patterns
-- **Next.js 15 Features**: App router, API routes, Turbopack, and SSR implementation
+- **React 19.1 Mastery**: Proper use of hooks, context, and component patterns
+- **Next.js 15.5 Features**: App router, API routes, Turbopack, and SSR implementation
 - **Database Integration**: Successful Supabase integration and queries
 - **Full-Stack Flow**: Complete data flow from frontend to backend
 
@@ -356,6 +356,6 @@ playlist_tracks (
 ### 11.2 Learning Success
 
 - Demonstrated proficiency with React, Next.js, TypeScript
-- Successful integration of Supabase and Express.js
+- Successful integration of Supabase and Next.js API routes
 - Understanding of full-stack development patterns
 - Portfolio-ready project showcasing technical skills
