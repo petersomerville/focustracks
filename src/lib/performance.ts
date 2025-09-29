@@ -183,7 +183,7 @@ export const bundleOptimization = {
       const importedModule = await import(modulePath)
       return (importedModule as { default?: unknown }).default || importedModule
     } catch (error) {
-      logger.error('Dynamic import failed', error, { modulePath, errorMessage: error instanceof Error ? error.message : String(error) })
+      logger.error('Dynamic import failed', error instanceof Error ? error : String(error), { modulePath, errorMessage: error instanceof Error ? error.message : String(error) })
       throw error
     }
   },

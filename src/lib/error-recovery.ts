@@ -94,7 +94,7 @@ export async function withRetry<T>(
     }
   }
 
-      logger.error('Operation failed after all retries', lastError, { 
+      logger.error('Operation failed after all retries', lastError instanceof Error ? lastError : String(lastError), { 
         maxRetries: config.maxRetries, 
         errorMessage: lastError instanceof Error ? lastError.message : String(lastError) 
       })
@@ -114,7 +114,7 @@ export async function withErrorRecovery<T>(
   try {
     return await withRetry(fn, retryOptions)
   } catch (error) {
-    logger.error('All retry attempts failed', error, { 
+    logger.error('All retry attempts failed', error instanceof Error ? error : String(error), { 
       errorMessage: error instanceof Error ? error.message : String(error),
       hasFallback: fallbackValue !== undefined
     })
@@ -220,7 +220,7 @@ export class ErrorRecoveryCache {
     // Return cached value if still valid
     if (cached && Date.now() - cached.timestamp < cached.ttl) {
       logger.debug('Cache hit', { key })
-      return cached.value
+      return cached.value as T
     }
 
     logger.debug('Cache miss, fetching fresh data', { key })
