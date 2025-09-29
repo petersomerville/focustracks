@@ -50,6 +50,7 @@ export default function Header({ onSearch }: HeaderProps) {
             <ThemeToggle />
             {user ? (
               <div className="flex items-center space-x-1">
+                <TrackSubmissionForm compact />
                 <Link
                   href="/playlists"
                   className="p-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
@@ -57,6 +58,15 @@ export default function Header({ onSearch }: HeaderProps) {
                 >
                   <List className="h-5 w-5" />
                 </Link>
+                {userRole === 'admin' && (
+                  <Link
+                    href="/admin"
+                    className="p-2 text-blue-700 dark:text-blue-300 hover:text-blue-900 dark:hover:text-blue-100 transition-colors"
+                    title="Admin"
+                  >
+                    <Settings className="h-5 w-5" />
+                  </Link>
+                )}
                 <Button
                   onClick={handleSignOut}
                   variant="ghost"

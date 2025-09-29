@@ -1,11 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { supabase, Track } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
+
+// Admin client with service role for bypassing RLS
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
+)
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
+
     const authHeader = request.headers.get('authorization')
     if (!authHeader) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
@@ -38,7 +53,7 @@ export async function PUT(
     const { data: submission, error: fetchError } = await supabase
       .from('track_submissions')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .single()
 
     if (fetchError || !submission) {
@@ -56,7 +71,7 @@ export async function PUT(
         admin_notes: admin_notes || null,
         updated_at: new Date().toISOString()
       })
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single()
 
@@ -66,23 +81,40 @@ export async function PUT(
     }
 
     if (status === 'approved') {
-      const { error: trackError } = await supabase
+      // Prepare track data for insertion with backward compatibility
+      const trackData: any = {
+        title: submission.title,
+        artist: submission.artist,
+        genre: submission.genre,
+        duration: submission.duration,
+        youtube_url: submission.youtube_url || null,
+        spotify_url: submission.spotify_url || null
+      }
+
+      // Also populate audio_url for backward compatibility (prefer youtube, fallback to spotify)
+      if (submission.youtube_url) {
+        trackData.audio_url = submission.youtube_url
+      } else if (submission.spotify_url) {
+        trackData.audio_url = submission.spotify_url
+      }
+
+      console.log('Inserting track data:', trackData)
+
+      const { data: insertedTrack, error: trackError } = await supabaseAdmin
         .from('tracks')
-        .insert({
-          title: submission.title,
-          artist: submission.artist,
-          genre: submission.genre,
-          duration: submission.duration,
-          youtube_url: submission.youtube_url,
-          spotify_url: submission.spotify_url
-        })
+        .insert(trackData)
+        .select()
 
       if (trackError) {
         console.error('Failed to create track:', trackError)
+        console.error('Track data that failed:', trackData)
         return NextResponse.json({
-          error: 'Submission approved but failed to create track'
+          error: 'Submission approved but failed to create track',
+          details: trackError.message
         }, { status: 500 })
       }
+
+      console.log('Successfully created track:', insertedTrack)
     }
 
     return NextResponse.json({

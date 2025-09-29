@@ -40,11 +40,61 @@ export function extractYouTubeVideoId(url: string): string | null {
   return match ? match[1] : null
 }
 
+export function parseDurationToSeconds(durationString: string): number {
+  if (!durationString) return 0
+
+  // Handle various formats: "5:30", "1:05:30", "90" (minutes), etc.
+  const parts = durationString.split(':').map(part => parseInt(part.trim(), 10))
+
+  if (parts.length === 1) {
+    // Single number - assume minutes
+    return parts[0] * 60
+  } else if (parts.length === 2) {
+    // mm:ss format
+    const [minutes, seconds] = parts
+    return (minutes * 60) + seconds
+  } else if (parts.length === 3) {
+    // hh:mm:ss format
+    const [hours, minutes, seconds] = parts
+    return (hours * 3600) + (minutes * 60) + seconds
+  }
+
+  return 0
+}
+
+export function formatSecondsToHMS(totalSeconds: number): string {
+  const hours = Math.floor(totalSeconds / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const seconds = totalSeconds % 60
+
+  if (hours > 0) {
+    return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+  } else {
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`
+  }
+}
+
+export function validateDurationFormat(durationString: string): boolean {
+  if (!durationString) return false
+
+  const trimmed = durationString.trim()
+
+  // Allow formats: "5:30", "1:05:30", "90" (standalone number treated as minutes)
+  // More flexible regex to handle various input formats
+  const patterns = [
+    /^\d{1,3}:\d{1,2}:\d{1,2}$/, // hh:mm:ss or h:mm:ss
+    /^\d{1,2}:\d{1,2}$/,         // mm:ss or m:ss
+    /^\d{1,3}$/                  // just minutes
+  ]
+
+  return patterns.some(pattern => pattern.test(trimmed))
+}
+
 export function validateTrackSubmission(submission: {
   title: string
   artist: string
   genre: string
-  duration: number
+  duration: string  // Changed from number to string
   youtube_url?: string
   spotify_url?: string
   description: string
@@ -67,7 +117,11 @@ export function validateTrackSubmission(submission: {
     errors.push('Description is required')
   }
 
-  if (submission.duration <= 0) {
+  if (!submission.duration.trim()) {
+    errors.push('Duration is required')
+  } else if (!validateDurationFormat(submission.duration)) {
+    errors.push('Duration must be in format mm:ss, hh:mm:ss, or just minutes (e.g., 5:30, 1:05:30, or 45)')
+  } else if (parseDurationToSeconds(submission.duration) <= 0) {
     errors.push('Duration must be greater than 0')
   }
 

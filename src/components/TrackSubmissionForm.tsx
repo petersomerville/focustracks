@@ -13,16 +13,17 @@ import {
 } from '@/components/ui/dialog'
 import { Plus } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
-import { validateTrackSubmission } from '@/lib/utils'
+import { validateTrackSubmission, parseDurationToSeconds } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 import ContentPolicyModal from './ContentPolicyModal'
 
 interface TrackSubmissionFormProps {
   onSubmissionSuccess?: () => void
+  compact?: boolean  // For mobile/compact display
 }
 
-export default function TrackSubmissionForm({ onSubmissionSuccess }: TrackSubmissionFormProps) {
+export default function TrackSubmissionForm({ onSubmissionSuccess, compact = false }: TrackSubmissionFormProps) {
   const { user } = useAuth()
   const [isOpen, setIsOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -56,16 +57,18 @@ export default function TrackSubmissionForm({ onSubmissionSuccess }: TrackSubmis
     setErrors([])
 
     try {
-      const submissionData = {
-        ...formData,
-        duration: parseInt(formData.duration) || 0
-      }
-
-      const validation = validateTrackSubmission(submissionData)
+      // First validate the form data with string duration
+      const validation = validateTrackSubmission(formData)
       if (!validation.valid) {
         setErrors(validation.errors)
         setIsSubmitting(false)
         return
+      }
+
+      // Convert duration to seconds for API submission
+      const submissionData = {
+        ...formData,
+        duration: parseDurationToSeconds(formData.duration)
       }
 
       const { data: { session } } = await supabase.auth.getSession()
@@ -75,14 +78,21 @@ export default function TrackSubmissionForm({ onSubmissionSuccess }: TrackSubmis
         return
       }
 
+      // Add timeout to prevent long waits
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
+
       const response = await fetch('/api/submissions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`
         },
-        body: JSON.stringify(submissionData)
+        body: JSON.stringify(submissionData),
+        signal: controller.signal
       })
+
+      clearTimeout(timeoutId)
 
       const result = await response.json()
 
@@ -92,6 +102,7 @@ export default function TrackSubmissionForm({ onSubmissionSuccess }: TrackSubmis
         } else {
           toast.error(result.error || 'Failed to submit track')
         }
+        setIsSubmitting(false)
         return
       }
 
@@ -109,7 +120,17 @@ export default function TrackSubmissionForm({ onSubmissionSuccess }: TrackSubmis
       onSubmissionSuccess?.()
     } catch (error) {
       console.error('Submission error:', error)
-      toast.error('An unexpected error occurred')
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          toast.error('Request timed out. Please try again.')
+        } else if (error.message.includes('fetch')) {
+          toast.error('Network error. Please check your connection and try again.')
+        } else {
+          toast.error(`Error: ${error.message}`)
+        }
+      } else {
+        toast.error('An unexpected error occurred')
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -133,12 +154,12 @@ export default function TrackSubmissionForm({ onSubmissionSuccess }: TrackSubmis
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="flex items-center space-x-2">
+        <Button variant="outline" className={`flex items-center ${compact ? 'p-2' : 'space-x-1 px-3 py-1'} text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors`}>
           <Plus className="h-4 w-4" />
-          <span>Submit Track</span>
+          {!compact && <span>Submit Track</span>}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <div>
@@ -216,17 +237,19 @@ export default function TrackSubmissionForm({ onSubmissionSuccess }: TrackSubmis
 
                 <div>
                   <label className="block text-sm font-medium mb-2">
-                    Duration (seconds) *
+                    Duration *
                   </label>
                   <input
-                    type="number"
+                    type="text"
                     value={formData.duration}
                     onChange={(e) => handleInputChange('duration', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="e.g. 2400 (40 minutes)"
-                    min="1"
+                    placeholder="e.g., 5:30, 1:05:30, or 45"
                     required
                   />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Enter as mm:ss, hh:mm:ss, or just minutes (e.g., 5:30, 1:05:30, or 45)
+                  </p>
                 </div>
               </div>
 
@@ -270,9 +293,9 @@ export default function TrackSubmissionForm({ onSubmissionSuccess }: TrackSubmis
                 />
               </div>
 
-              <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-                <h4 className="text-blue-800 font-medium mb-2">Content Guidelines</h4>
-                <ul className="text-blue-700 text-sm space-y-1">
+              <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-md p-4">
+                <h4 className="text-blue-800 dark:text-blue-200 font-medium mb-2">Content Guidelines</h4>
+                <ul className="text-blue-700 dark:text-blue-300 text-sm space-y-1">
                   <li>• Focus music only (ambient, classical, instrumental, lo-fi, etc.)</li>
                   <li>• Must be publicly available on YouTube/Spotify</li>
                   <li>• No copyrighted music without proper licensing</li>
@@ -293,7 +316,7 @@ export default function TrackSubmissionForm({ onSubmissionSuccess }: TrackSubmis
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-1"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition-colors shadow-sm"
                 >
                   {isSubmitting ? 'Submitting...' : 'Submit Track'}
                 </Button>

@@ -20,7 +20,7 @@ export default function ContentPolicyModal() {
           <span>Content Policy</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <DialogHeader>
           <DialogTitle>FocusTracks Content Policy</DialogTitle>
           <DialogDescription>
@@ -117,8 +117,8 @@ export default function ContentPolicyModal() {
           </section>
 
           <section>
-            <h3 className="text-lg font-semibold mb-3 text-purple-700">🔄 Submission Process</h3>
-            <div className="bg-purple-50 border border-purple-200 rounded-md p-4">
+            <h3 className="text-lg font-semibold mb-3 text-purple-700 dark:text-purple-300">🔄 Submission Process</h3>
+            <div className="bg-purple-50 dark:bg-purple-950 border border-purple-200 dark:border-purple-800 rounded-md p-4">
               <ol className="list-decimal list-inside text-sm space-y-2">
                 <li><strong>Submit your track</strong> with complete information and valid URLs</li>
                 <li><strong>Admin review</strong> - Our team checks content policy compliance</li>
@@ -131,8 +131,8 @@ export default function ContentPolicyModal() {
           </section>
 
           <section>
-            <h3 className="text-lg font-semibold mb-3 text-yellow-700">⚠️ Important Notes</h3>
-            <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+            <h3 className="text-lg font-semibold mb-3 text-yellow-700 dark:text-yellow-300">⚠️ Important Notes</h3>
+            <div className="bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-md p-4">
               <ul className="list-disc list-inside text-sm space-y-2">
                 <li><strong>Quality over quantity:</strong> We prefer fewer high-quality submissions</li>
                 <li><strong>Respect copyright:</strong> When in doubt, don't submit copyrighted content</li>

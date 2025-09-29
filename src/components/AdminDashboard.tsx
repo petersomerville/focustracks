@@ -139,9 +139,14 @@ export default function AdminDashboard() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-        <Button onClick={fetchSubmissions} variant="outline">
-          Refresh
-        </Button>
+        <div className="flex space-x-2">
+          <Button onClick={() => window.location.href = '/'} variant="outline">
+            Return to Home
+          </Button>
+          <Button onClick={fetchSubmissions} variant="outline">
+            Refresh
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
