@@ -20,6 +20,7 @@ interface YouTubePlayerProps {
   onSkipForward: () => void
   onVolumeChange: (volume: number) => void
   volume: number
+  onTrackEnd?: () => void
 }
 
 export default function YouTubePlayer({
@@ -30,7 +31,8 @@ export default function YouTubePlayer({
   onSkipBack,
   onSkipForward,
   onVolumeChange,
-  volume
+  volume,
+  onTrackEnd
 }: YouTubePlayerProps) {
   const [player, setPlayer] = useState<YT.Player | null>(null)
   const [isPlayerReady, setIsPlayerReady] = useState(false)
@@ -128,6 +130,12 @@ export default function YouTubePlayer({
             if (stateName !== 'unknown') {
               logger.debug(`Player state changed to ${stateName}`, { state: event.data })
             }
+
+            // Handle track end
+            if (event.data === window.YT.PlayerState.ENDED && onTrackEnd) {
+              logger.debug('Track ended, calling onTrackEnd callback')
+              onTrackEnd()
+            }
           },
           onError: (event: YT.OnErrorEvent) => {
             logger.error('YouTube player error occurred', String(event.data), { errorCode: event.data })
@@ -135,7 +143,7 @@ export default function YouTubePlayer({
         }
       })
     }
-  }, [isPlayerReady])
+  }, [isPlayerReady, onTrackEnd])
 
   // Cleanup on unmount
   useEffect(() => {
