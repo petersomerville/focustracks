@@ -17,10 +17,19 @@ export async function middleware(request: NextRequest) {
 
   // API route security
   if (pathname.startsWith('/api/')) {
-    // Validate origin for API routes
-    const originCheck = securityMiddleware.validateOrigin()(request)
-    if (originCheck) {
-      return originCheck
+    // Skip origin validation for certain routes that handle client-side requests
+    const skipOriginValidation = [
+      '/api/tracks',
+      '/api/playlists',
+      '/api/search'
+    ].some(route => pathname.startsWith(route) && request.method === 'GET')
+    
+    if (!skipOriginValidation) {
+      // Validate origin for API routes
+      const originCheck = securityMiddleware.validateOrigin()(request)
+      if (originCheck) {
+        return originCheck
+      }
     }
 
     // Apply rate limiting based on endpoint
