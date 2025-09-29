@@ -143,7 +143,7 @@ export default function YouTubePlayer({
         }
       })
     }
-  }, [isPlayerReady])
+  }, [isPlayerReady, onTrackEnd])
 
   // Cleanup on unmount
   useEffect(() => {

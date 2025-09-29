@@ -20,6 +20,7 @@ describe('AuthModal', () => {
     mockUseAuth.mockReturnValue({
       user: null,
       loading: false,
+      userRole: null,
       signIn: mockSignIn,
       signUp: mockSignUp,
       signOut: jest.fn(),

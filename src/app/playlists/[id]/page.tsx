@@ -7,7 +7,7 @@ import ProtectedRoute from '@/components/ProtectedRoute'
 import TrackCard from '@/components/TrackCard'
 import YouTubePlayer from '@/components/YouTubePlayer'
 import { Track, Playlist } from '@/lib/supabase'
-import { ArrowLeft, Trash2, Music, Shuffle, Repeat } from 'lucide-react'
+import { ArrowLeft, Trash2, Music, Repeat } from 'lucide-react'
 import { createLogger } from '@/lib/logger'
 
 export default function PlaylistDetailPage() {

@@ -14,13 +14,13 @@ export interface RetryOptions {
   baseDelay?: number
   maxDelay?: number
   backoffMultiplier?: number
-  retryCondition?: (error: any) => boolean
+  retryCondition?: (error: unknown) => boolean
 }
 
 export interface ErrorRecoveryOptions extends RetryOptions {
-  fallbackValue?: any
-  onRetry?: (attempt: number, error: any) => void
-  onFailure?: (error: any) => void
+  fallbackValue?: unknown
+  onRetry?: (attempt: number, error: unknown) => void
+  onFailure?: (error: unknown) => void
 }
 
 const DEFAULT_RETRY_OPTIONS: Required<RetryOptions> = {
@@ -30,9 +30,10 @@ const DEFAULT_RETRY_OPTIONS: Required<RetryOptions> = {
   backoffMultiplier: 2,
   retryCondition: (error) => {
     // Retry on network errors, timeouts, and 5xx server errors
-    if (error?.code === 'NETWORK_ERROR' || error?.code === 'TIMEOUT') return true
-    if (error?.status >= 500 && error?.status < 600) return true
-    if (error?.message?.includes('fetch')) return true
+    const errorObj = error as { code?: string; status?: number; message?: string }
+    if (errorObj?.code === 'NETWORK_ERROR' || errorObj?.code === 'TIMEOUT') return true
+    if (errorObj?.status && errorObj.status >= 500 && errorObj.status < 600) return true
+    if (errorObj?.message?.includes('fetch')) return true
     return false
   }
 }
@@ -60,7 +61,7 @@ export async function withRetry<T>(
   options: RetryOptions = {}
 ): Promise<T> {
   const config = { ...DEFAULT_RETRY_OPTIONS, ...options }
-  let lastError: any
+  let lastError: unknown
 
   for (let attempt = 1; attempt <= config.maxRetries; attempt++) {
     try {
@@ -93,10 +94,10 @@ export async function withRetry<T>(
     }
   }
 
-  logger.error('Operation failed after all retries', { 
-    maxRetries: config.maxRetries, 
-    error: lastError instanceof Error ? lastError.message : String(lastError) 
-  })
+      logger.error('Operation failed after all retries', { 
+        maxRetries: config.maxRetries, 
+        errorMessage: lastError instanceof Error ? lastError.message : String(lastError) 
+      })
   
   throw lastError
 }
@@ -108,13 +109,13 @@ export async function withErrorRecovery<T>(
   fn: () => Promise<T>,
   options: ErrorRecoveryOptions = {}
 ): Promise<T> {
-  const { fallbackValue, onRetry, onFailure, ...retryOptions } = options
+  const { fallbackValue, onFailure, ...retryOptions } = options
 
   try {
     return await withRetry(fn, retryOptions)
   } catch (error) {
     logger.error('All retry attempts failed', { 
-      error: error instanceof Error ? error.message : String(error),
+      errorMessage: error instanceof Error ? error.message : String(error),
       hasFallback: fallbackValue !== undefined
     })
 
@@ -124,7 +125,7 @@ export async function withErrorRecovery<T>(
 
     if (fallbackValue !== undefined) {
       logger.info('Using fallback value', { fallbackType: typeof fallbackValue })
-      return fallbackValue
+      return fallbackValue as T
     }
 
     throw error
@@ -153,7 +154,7 @@ export async function fetchWithRetry(
 
       if (!response.ok) {
         const error = new Error(`HTTP ${response.status}: ${response.statusText}`)
-        ;(error as any).status = response.status
+        ;(error as Error & { status: number }).status = response.status
         throw error
       }
 
@@ -163,13 +164,13 @@ export async function fetchWithRetry(
       
       if (error instanceof Error && error.name === 'AbortError') {
         const timeoutError = new Error('Request timeout')
-        ;(timeoutError as any).code = 'TIMEOUT'
+        ;(timeoutError as Error & { code: string }).code = 'TIMEOUT'
         throw timeoutError
       }
 
       if (error instanceof TypeError && error.message.includes('fetch')) {
         const networkError = new Error('Network error')
-        ;(networkError as any).code = 'NETWORK_ERROR'
+        ;(networkError as Error & { code: string }).code = 'NETWORK_ERROR'
         throw networkError
       }
 
@@ -189,11 +190,12 @@ export async function dbOperationWithRetry<T>(
     ...retryOptions,
     retryCondition: (error) => {
       // Retry on database connection errors, timeouts, and deadlocks
-      if (error?.code === 'CONNECTION_ERROR') return true
-      if (error?.code === 'TIMEOUT') return true
-      if (error?.code === 'DEADLOCK') return true
-      if (error?.message?.includes('connection')) return true
-      if (error?.message?.includes('timeout')) return true
+      const errorObj = error as { code?: string; message?: string }
+      if (errorObj?.code === 'CONNECTION_ERROR') return true
+      if (errorObj?.code === 'TIMEOUT') return true
+      if (errorObj?.code === 'DEADLOCK') return true
+      if (errorObj?.message?.includes('connection')) return true
+      if (errorObj?.message?.includes('timeout')) return true
       return DEFAULT_RETRY_OPTIONS.retryCondition(error)
     }
   })
@@ -203,7 +205,7 @@ export async function dbOperationWithRetry<T>(
  * Cache with error recovery
  */
 export class ErrorRecoveryCache {
-  private cache = new Map<string, { value: any; timestamp: number; ttl: number }>()
+  private cache = new Map<string, { value: unknown; timestamp: number; ttl: number }>()
 
   constructor(private defaultTTL: number = 5 * 60 * 1000) {} // 5 minutes default
 
@@ -233,15 +235,15 @@ export class ErrorRecoveryCache {
         ttl
       })
 
-      return value
+      return value as T
     } catch (error) {
       // If we have stale cache data, return it as fallback
       if (cached) {
         logger.warn('Using stale cache data due to fetch failure', { 
           key, 
-          error: error instanceof Error ? error.message : String(error) 
+          errorMessage: error instanceof Error ? error.message : String(error) 
         })
-        return cached.value
+        return cached.value as T
       }
 
       throw error

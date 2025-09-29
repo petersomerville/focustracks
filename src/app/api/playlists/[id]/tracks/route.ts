@@ -4,7 +4,7 @@ import { createLogger } from '@/lib/logger'
 import { createErrorResponse, formatZodErrors, addTrackToPlaylistSchema, createApiResponse } from '@/lib/api-schemas'
 import { z } from 'zod'
 
-const logger = createLogger('api:playlists:[id]:tracks')
+const _logger = createLogger('api:playlists:[id]:tracks')
 
 // Schema for reordering tracks
 const reorderTracksSchema = z.object({

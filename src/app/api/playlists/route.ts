@@ -11,9 +11,9 @@ export async function GET(_request: NextRequest) {
     logger.apiRequest('GET', '/api/playlists')
 
     // Query playlists from database
-    const { data: playlists, error, count } = await supabase
+    const { data: playlists, error } = await supabase
       .from('playlists')
-      .select('*', { count: 'exact' })
+      .select('*')
       .order('created_at', { ascending: false })
 
     const duration = Date.now() - startTime

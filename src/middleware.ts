@@ -4,7 +4,7 @@ import { createLogger } from '@/lib/logger'
 
 const logger = createLogger('middleware')
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Apply security headers to all responses
@@ -24,36 +24,32 @@ export function middleware(request: NextRequest) {
     }
 
     // Apply rate limiting based on endpoint
-    let rateLimiter = null
+    const clientIP = requestValidation.getClientIP(request)
     
     if (pathname.startsWith('/api/auth/')) {
       // More restrictive rate limiting for auth endpoints
-      const { rateLimiters } = require('@/lib/security')
-      const clientIP = requestValidation.getClientIP(request)
+      const { rateLimiters } = await import('@/lib/security')
       const rateLimitCheck = securityMiddleware.rateLimit(rateLimiters.auth, clientIP)(request)
       if (rateLimitCheck) {
         return rateLimitCheck
       }
     } else if (pathname.startsWith('/api/playlists/') && request.method !== 'GET') {
       // Rate limiting for playlist modifications
-      const { rateLimiters } = require('@/lib/security')
-      const clientIP = requestValidation.getClientIP(request)
+      const { rateLimiters } = await import('@/lib/security')
       const rateLimitCheck = securityMiddleware.rateLimit(rateLimiters.playlist, clientIP)(request)
       if (rateLimitCheck) {
         return rateLimitCheck
       }
     } else if (pathname.startsWith('/api/search')) {
       // Rate limiting for search endpoints
-      const { rateLimiters } = require('@/lib/security')
-      const clientIP = requestValidation.getClientIP(request)
+      const { rateLimiters } = await import('@/lib/security')
       const rateLimitCheck = securityMiddleware.rateLimit(rateLimiters.search, clientIP)(request)
       if (rateLimitCheck) {
         return rateLimitCheck
       }
     } else if (pathname.startsWith('/api/')) {
       // General API rate limiting
-      const { rateLimiters } = require('@/lib/security')
-      const clientIP = requestValidation.getClientIP(request)
+      const { rateLimiters } = await import('@/lib/security')
       const rateLimitCheck = securityMiddleware.rateLimit(rateLimiters.api, clientIP)(request)
       if (rateLimitCheck) {
         return rateLimitCheck

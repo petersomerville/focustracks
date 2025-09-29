@@ -231,7 +231,7 @@ export const requestValidation = {
       process.env.NEXT_PUBLIC_APP_URL,
       'http://localhost:3000',
       'https://localhost:3000'
-    ].filter(Boolean)
+    ].filter((url): url is string => Boolean(url))
 
     if (origin) {
       return allowedOrigins.some(allowed => origin.startsWith(allowed))
@@ -321,7 +321,7 @@ export const securityMiddleware = {
   /**
    * Input validation middleware
    */
-  validateInput: (schema: any) => {
+  validateInput: (_schema: unknown) => {
     return (request: NextRequest) => {
       // This would be implemented with Zod or similar validation library
       // For now, we'll do basic checks
@@ -389,7 +389,7 @@ export const securityMonitoring = {
   /**
    * Log suspicious activity
    */
-  logSuspiciousActivity: (type: string, details: Record<string, any>) => {
+  logSuspiciousActivity: (type: string, details: Record<string, unknown>) => {
     logger.warn('Suspicious activity detected', {
       type,
       timestamp: new Date().toISOString(),
@@ -400,7 +400,7 @@ export const securityMonitoring = {
   /**
    * Log security events
    */
-  logSecurityEvent: (event: string, details: Record<string, any>) => {
+  logSecurityEvent: (event: string, details: Record<string, unknown>) => {
     logger.info('Security event', {
       event,
       timestamp: new Date().toISOString(),

@@ -6,14 +6,14 @@
  */
 
 import { createLogger } from './logger'
-import { ErrorRecoveryCache, globalCache } from './error-recovery'
+import { globalCache } from './error-recovery'
 
 const logger = createLogger('performance')
 
 /**
  * Memoization utility for expensive computations
  */
-export function memoize<T extends (...args: any[]) => any>(
+export function memoize<T extends (...args: unknown[]) => unknown>(
   fn: T,
   options: {
     maxSize?: number
@@ -25,21 +25,23 @@ export function memoize<T extends (...args: any[]) => any>(
   const cache = new Map<string, { value: ReturnType<T>; timestamp: number }>()
 
   return ((...args: Parameters<T>) => {
-    const key = keyGenerator ? keyGenerator(...args) : JSON.stringify(args)
+    const key = keyGenerator ? keyGenerator(...args) : JSON.stringify(args) || 'default'
     const cached = cache.get(key)
 
     if (cached && Date.now() - cached.timestamp < ttl) {
       logger.debug('Memoization cache hit', { key })
-      return cached.value
+      return cached.value as ReturnType<T>
     }
 
     const result = fn(...args)
-    cache.set(key, { value: result, timestamp: Date.now() })
+    cache.set(key, { value: result as ReturnType<T>, timestamp: Date.now() })
 
     // Clean up old entries if cache is too large
     if (cache.size > maxSize) {
       const oldestKey = cache.keys().next().value
-      cache.delete(oldestKey)
+      if (oldestKey) {
+        cache.delete(oldestKey)
+      }
     }
 
     logger.debug('Memoization cache miss', { key })
@@ -50,7 +52,7 @@ export function memoize<T extends (...args: any[]) => any>(
 /**
  * Debounce utility for limiting function calls
  */
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => unknown>(
   fn: T,
   delay: number
 ): T {
@@ -65,7 +67,7 @@ export function debounce<T extends (...args: any[]) => any>(
 /**
  * Throttle utility for limiting function calls
  */
-export function throttle<T extends (...args: any[]) => any>(
+export function throttle<T extends (...args: unknown[]) => unknown>(
   fn: T,
   limit: number
 ): T {
@@ -83,7 +85,7 @@ export function throttle<T extends (...args: any[]) => any>(
 /**
  * Performance monitoring decorator
  */
-export function measurePerformance<T extends (...args: any[]) => any>(
+export function measurePerformance<T extends (...args: unknown[]) => unknown>(
   fn: T,
   name?: string
 ): T {
@@ -108,7 +110,7 @@ export function measurePerformance<T extends (...args: any[]) => any>(
 /**
  * Async performance monitoring decorator
  */
-export function measureAsyncPerformance<T extends (...args: any[]) => Promise<any>>(
+export function measureAsyncPerformance<T extends (...args: unknown[]) => Promise<unknown>>(
   fn: T,
   name?: string
 ): T {
@@ -178,10 +180,10 @@ export const bundleOptimization = {
    */
   dynamicImport: async <T>(modulePath: string): Promise<T> => {
     try {
-      const module = await import(modulePath)
-      return module.default || module
+      const importedModule = await import(modulePath)
+      return (importedModule as { default?: unknown }).default || importedModule
     } catch (error) {
-      logger.error('Dynamic import failed', { modulePath, error })
+      logger.error('Dynamic import failed', { modulePath, errorMessage: error instanceof Error ? error.message : String(error) })
       throw error
     }
   },
@@ -278,8 +280,8 @@ export const memoryManagement = {
     globalCache.clear()
     
     // Force garbage collection if available
-    if (typeof window !== 'undefined' && (window as any).gc) {
-      (window as any).gc()
+    if (typeof window !== 'undefined' && (window as { gc?: () => void }).gc) {
+      (window as { gc: () => void }).gc()
     }
     
     logger.info('Memory cleanup completed')
@@ -291,7 +293,7 @@ export const memoryManagement = {
   getMemoryUsage: () => {
     if (typeof window === 'undefined') return null
 
-    const memory = (performance as any).memory
+    const memory = (performance as { memory?: { usedJSHeapSize: number; totalJSHeapSize: number; jsHeapSizeLimit: number } }).memory
     if (!memory) return null
 
     return {

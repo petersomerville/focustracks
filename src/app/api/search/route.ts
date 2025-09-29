@@ -53,8 +53,8 @@ export async function GET(request: NextRequest) {
     })
 
     const results: {
-      tracks?: any[]
-      playlists?: any[]
+      tracks?: unknown[]
+      playlists?: unknown[]
       pagination: {
         total: number
         limit: number

@@ -16,7 +16,7 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false)
   const [displayName, setDisplayName] = useState('')
   const [bio, setBio] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [_loading, _setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 

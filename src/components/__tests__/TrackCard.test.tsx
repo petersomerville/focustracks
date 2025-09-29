@@ -35,8 +35,16 @@ describe('TrackCard', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockUseAuth.mockReturnValue({
-      user: { id: '1', email: 'test@example.com' },
+      user: { 
+        id: '1', 
+        email: 'test@example.com',
+        app_metadata: {},
+        user_metadata: {},
+        aud: 'authenticated',
+        created_at: '2024-01-01T00:00:00Z'
+      },
       loading: false,
+      userRole: 'user',
       signIn: jest.fn(),
       signUp: jest.fn(),
       signOut: jest.fn(),
@@ -164,6 +172,7 @@ describe('TrackCard', () => {
     mockUseAuth.mockReturnValue({
       user: null,
       loading: false,
+      userRole: null,
       signIn: jest.fn(),
       signUp: jest.fn(),
       signOut: jest.fn(),
