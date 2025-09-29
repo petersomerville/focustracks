@@ -1,10 +1,11 @@
 'use client'
 
-import { Music, Search, User, LogIn, LogOut, List } from 'lucide-react'
+import { Music, Search, User, LogIn, LogOut, List, Settings } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useState } from 'react'
 import AuthModal from './AuthModal'
 import ThemeToggle from './ThemeToggle'
+import TrackSubmissionForm from './TrackSubmissionForm'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
@@ -13,7 +14,7 @@ interface HeaderProps {
 }
 
 export default function Header({ onSearch }: HeaderProps) {
-  const { user, signOut } = useAuth()
+  const { user, userRole, signOut } = useAuth()
   const [searchQuery, setSearchQuery] = useState('')
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login')
@@ -105,6 +106,7 @@ export default function Header({ onSearch }: HeaderProps) {
             
             {user ? (
               <div className="flex items-center space-x-2">
+                <TrackSubmissionForm />
                 <Link
                   href="/playlists"
                   className="flex items-center space-x-1 px-3 py-1 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
@@ -112,6 +114,15 @@ export default function Header({ onSearch }: HeaderProps) {
                   <List className="h-4 w-4" />
                   <span>Playlists</span>
                 </Link>
+                {userRole === 'admin' && (
+                  <Link
+                    href="/admin"
+                    className="flex items-center space-x-1 px-3 py-1 text-sm text-blue-700 dark:text-blue-300 hover:text-blue-900 dark:hover:text-blue-100 border border-blue-300 dark:border-blue-600 rounded-md hover:bg-blue-50 dark:hover:bg-blue-800 transition-colors"
+                  >
+                    <Settings className="h-4 w-4" />
+                    <span>Admin</span>
+                  </Link>
+                )}
                 <div className="flex items-center space-x-2">
                   <User className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                   <span className="text-sm text-gray-700 dark:text-gray-300 hidden lg:inline">{user.email}</span>
