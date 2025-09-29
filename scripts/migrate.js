@@ -9,9 +9,10 @@
  * - Data repair functions
  */
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { createClient } = require('@supabase/supabase-js')
-const fs = require('fs')
-const path = require('path')
+// const fs = require('fs') // Unused import
+// const path = require('path') // Unused import
 
 // Configuration
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -33,7 +34,7 @@ const supabase = createClient(supabaseUrl, serviceRoleKey, {
   }
 })
 
-const migrationsDir = path.join(__dirname, '..', 'migrations')
+// const migrationsDir = path.join(__dirname, '..', 'migrations') // Unused variable
 
 /**
  * Repair data inconsistencies (replaces manual SQL scripts)
@@ -278,7 +279,7 @@ async function validateEnvironment() {
   // Test database connection
   console.log('\nDatabase Connection:')
   try {
-    const { data, error } = await supabase.from('tracks').select('count(*)', { count: 'exact', head: true })
+    const { error } = await supabase.from('tracks').select('count(*)', { count: 'exact', head: true })
 
     if (error) {
       console.log(`❌ Database connection failed: ${error.message}`)
