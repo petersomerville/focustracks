@@ -127,9 +127,10 @@ export default function Header({ onSearch }: HeaderProps) {
                 <Link
                   href="/profile"
                   className="flex items-center space-x-1 px-3 py-1 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  title="Profile"
                 >
                   <User className="h-4 w-4" />
-                  <span>Profile</span>
+                  <span className="hidden lg:inline">Profile</span>
                 </Link>
                 {userRole === 'admin' && (
                   <Link
