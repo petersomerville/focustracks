@@ -40,7 +40,9 @@ export default function PlaylistDetailPage() {
         throw new Error(data.error || 'Failed to fetch playlist')
       }
 
-      setPlaylist(data.playlist)
+      // API returns { success: true, data: { playlist: ... } }
+      const playlist = data.data?.playlist || data.playlist
+      setPlaylist(playlist)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
@@ -59,7 +61,7 @@ export default function PlaylistDetailPage() {
 
     try {
       setDeletingTrack(trackId)
-      const response = await fetch(`/api/playlists/${playlistId}/tracks?trackId=${trackId}`, {
+      const response = await fetch(`/api/playlists/${playlistId}/tracks?track_id=${trackId}`, {
         method: 'DELETE',
       })
 

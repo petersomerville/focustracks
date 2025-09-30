@@ -21,7 +21,8 @@ export async function middleware(request: NextRequest) {
     const skipOriginValidation = [
       '/api/tracks',
       '/api/playlists',
-      '/api/search'
+      '/api/search',
+      '/api/submissions'
     ].some(route => pathname.startsWith(route) && request.method === 'GET')
     
     if (!skipOriginValidation) {

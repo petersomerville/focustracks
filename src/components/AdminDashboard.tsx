@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -14,22 +14,17 @@ export default function AdminDashboard() {
   const [submissions, setSubmissions] = useState<TrackSubmission[]>([])
   const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (user && userRole === 'admin') {
-      fetchSubmissions()
-    } else {
-      setLoading(false)
-    }
-  }, [user, userRole])
+  const [error, setError] = useState<string | null>(null)
 
   const fetchSubmissions = async () => {
     try {
       setLoading(true)
+      setError(null)
       const { data: { session } } = await supabase.auth.getSession()
 
       if (!session?.access_token) {
-        toast.error('Authentication required')
+        const errorMsg = 'Authentication required'
+        setError(errorMsg)
         return
       }
 
@@ -42,18 +37,32 @@ export default function AdminDashboard() {
       const result = await response.json()
 
       if (!response.ok) {
-        toast.error(result.error || 'Failed to fetch submissions')
+        const errorMsg = result.error || 'Failed to fetch submissions'
+        setError(errorMsg)
+        console.error('API error:', { status: response.status, error: result })
         return
       }
 
       setSubmissions(result.submissions || [])
+      setError(null)
     } catch (error) {
       console.error('Error fetching submissions:', error)
-      toast.error('Failed to load submissions')
+      const errorMsg = 'Failed to load submissions'
+      setError(errorMsg)
     } finally {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (user && userRole === 'admin') {
+      fetchSubmissions()
+    } else if (userRole && userRole !== 'admin') {
+      setLoading(false)
+    }
+    // Only run when userRole changes - ignore user object changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userRole])
 
   const handleSubmissionAction = async (submissionId: string, status: 'approved' | 'rejected', adminNotes?: string) => {
     try {
@@ -131,6 +140,31 @@ export default function AdminDashboard() {
     return (
       <div className="flex items-center justify-center min-h-64">
         <p className="text-muted-foreground">Loading submissions...</p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+          <div className="flex space-x-2">
+            <Button onClick={() => window.location.href = '/'} variant="outline">
+              Return to Home
+            </Button>
+            <Button onClick={fetchSubmissions} variant="outline">
+              Retry
+            </Button>
+          </div>
+        </div>
+        <Card className="p-8 text-center border-destructive">
+          <p className="text-destructive font-semibold mb-2">Error Loading Dashboard</p>
+          <p className="text-muted-foreground">{error}</p>
+          <p className="text-sm text-muted-foreground mt-4">
+            Check browser console for more details
+          </p>
+        </Card>
       </div>
     )
   }
