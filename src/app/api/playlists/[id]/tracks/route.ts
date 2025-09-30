@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { createLogger } from '@/lib/logger'
 import { createErrorResponse, formatZodErrors, addTrackToPlaylistSchema, createApiResponse } from '@/lib/api-schemas'
 import { z } from 'zod'
@@ -21,8 +21,9 @@ export async function POST(
   const { id } = await params
 
   try {
+    const supabase = await createServerSupabaseClient()
     const body = await request.json()
-    
+
     // Validate request body using Zod schema
     const validation = addTrackToPlaylistSchema.safeParse(body)
     if (!validation.success) {
@@ -128,6 +129,7 @@ export async function DELETE(
   const { id } = await params
 
   try {
+    const supabase = await createServerSupabaseClient()
     const { searchParams } = new URL(request.url)
     const track_id = searchParams.get('track_id')
 
@@ -215,8 +217,9 @@ export async function PUT(
   const { id } = await params
 
   try {
+    const supabase = await createServerSupabaseClient()
     const body = await request.json()
-    
+
     // Validate request body using Zod schema
     const validation = reorderTracksSchema.safeParse(body)
     if (!validation.success) {

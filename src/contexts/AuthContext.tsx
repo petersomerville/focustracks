@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { User } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { createLogger } from '@/lib/logger'
@@ -27,7 +27,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Check cache first
     const cachedRole = roleCache.current.get(userId)
     if (cachedRole) {
-      logger.debug('Using cached role for user ID', { userId, role: cachedRole })
+      // Return cached role without logging to avoid spam
       return cachedRole
     }
 
@@ -117,7 +117,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe()
   }, [fetchUserRole])
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = useCallback(async (email: string, password: string) => {
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -128,9 +128,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       logger.error('SignIn error', error instanceof Error ? error : String(error))
       return { error: 'An unexpected error occurred' }
     }
-  }
+  }, [logger])
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = useCallback(async (email: string, password: string) => {
     try {
       const { error } = await supabase.auth.signUp({
         email,
@@ -141,20 +141,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       logger.error('SignUp error', error instanceof Error ? error : String(error))
       return { error: 'An unexpected error occurred' }
     }
-  }
+  }, [logger])
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     await supabase.auth.signOut()
-  }
+  }, [])
 
-  const value = {
+  const value = useMemo(() => ({
     user,
     loading,
     userRole,
     signIn,
     signUp,
     signOut,
-  }
+  }), [user, loading, userRole, signIn, signUp, signOut])
 
   return (
     <AuthContext.Provider value={value}>

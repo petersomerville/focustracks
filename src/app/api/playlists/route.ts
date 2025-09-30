@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { createLogger } from '@/lib/logger'
 import { createPlaylistSchema, createErrorResponse, formatZodErrors, createApiResponse } from '@/lib/api-schemas'
 
@@ -8,12 +8,25 @@ export async function GET(_request: NextRequest) {
   const startTime = Date.now()
 
   try {
-    logger.apiRequest('GET', '/api/playlists')
+    // Get authenticated user from server-side client
+    const supabaseServer = await createServerSupabaseClient()
+    const { data: { user }, error: authError } = await supabaseServer.auth.getUser()
 
-    // Query playlists from database
-    const { data: playlists, error } = await supabase
+    if (authError || !user) {
+      logger.warn('Unauthorized playlists fetch attempt', { authError })
+      return NextResponse.json(
+        createErrorResponse('Unauthorized', 'You must be logged in to view playlists', 'UNAUTHORIZED'),
+        { status: 401 }
+      )
+    }
+
+    logger.apiRequest('GET', '/api/playlists', { userId: user.id })
+
+    // Query playlists from database for the authenticated user
+    const { data: playlists, error } = await supabaseServer
       .from('playlists')
       .select('*')
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false })
 
     const duration = Date.now() - startTime
@@ -49,8 +62,20 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now()
 
   try {
+    // Get authenticated user from server-side client
+    const supabaseServer = await createServerSupabaseClient()
+    const { data: { user }, error: authError } = await supabaseServer.auth.getUser()
+
+    if (authError || !user) {
+      logger.warn('Unauthorized playlist creation attempt', { authError })
+      return NextResponse.json(
+        createErrorResponse('Unauthorized', 'You must be logged in to create playlists', 'UNAUTHORIZED'),
+        { status: 401 }
+      )
+    }
+
     const body = await request.json()
-    
+
     // Validate request body using Zod schema
     const validation = createPlaylistSchema.safeParse(body)
     if (!validation.success) {
@@ -65,14 +90,14 @@ export async function POST(request: NextRequest) {
 
     const { name } = validation.data
 
-    logger.apiRequest('POST', '/api/playlists', { name })
+    logger.apiRequest('POST', '/api/playlists', { name, userId: user.id })
 
-    // Create new playlist in database
-    const { data: newPlaylist, error } = await supabase
+    // Create new playlist in database using authenticated client
+    const { data: newPlaylist, error } = await supabaseServer
       .from('playlists')
       .insert({
         name: name.trim(),
-        user_id: 'demo-user-1', // For now, use demo user. In production, get from auth
+        user_id: user.id,
       })
       .select()
       .single()

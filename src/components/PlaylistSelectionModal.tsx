@@ -31,7 +31,9 @@ export default function PlaylistSelectionModal({
       setLoading(true)
       const response = await fetch('/api/playlists')
       const data = await response.json()
-      setPlaylists(data.playlists || [])
+      // API returns { success: true, data: { playlists: ... } }
+      const playlistsData = data.data?.playlists || data.playlists || []
+      setPlaylists(playlistsData)
     } catch (error) {
       logger.error('Error fetching playlists', error instanceof Error ? error : String(error))
     } finally {
@@ -56,7 +58,7 @@ export default function PlaylistSelectionModal({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          trackId: track.id,
+          track_id: track.id,
         }),
       })
 
@@ -98,7 +100,11 @@ export default function PlaylistSelectionModal({
 
         // Automatically add the track to the new playlist
         if (track) {
-          await handleAddToPlaylist(data.playlist.id)
+          // API returns { success: true, data: { playlist: ... } }
+          const playlistId = data.data?.playlist?.id || data.playlist?.id
+          if (playlistId) {
+            await handleAddToPlaylist(playlistId)
+          }
         }
       } else {
         const error = await response.json()
