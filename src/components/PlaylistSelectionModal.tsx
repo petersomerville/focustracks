@@ -39,7 +39,7 @@ export default function PlaylistSelectionModal({
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [logger])
 
   useEffect(() => {
     if (isOpen) {

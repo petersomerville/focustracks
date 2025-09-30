@@ -102,8 +102,7 @@ export async function GET(request: NextRequest) {
 
     const token = authHeader.replace('Bearer ', '')
     // Use service role client to bypass RLS for admin check
-    const adminClient = getSupabaseClient()
-    const userClient = getSupabaseClient(token)
+  const adminClient = getSupabaseClient()
 
     const { data: { user }, error: authError } = await adminClient.auth.getUser(token)
 

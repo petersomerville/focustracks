@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { createLogger } from '@/lib/logger'
 import { createPlaylistSchema, createErrorResponse, formatZodErrors, createApiResponse } from '@/lib/api-schemas'
