@@ -27,7 +27,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Check cache first
     const cachedRole = roleCache.current.get(userId)
     if (cachedRole) {
-      logger.debug('Using cached role for user ID', { userId, role: cachedRole })
+      // Return cached role without logging to avoid spam
       return cachedRole
     }
 

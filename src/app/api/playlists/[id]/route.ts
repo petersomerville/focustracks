@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { createLogger } from '@/lib/logger'
 import { createErrorResponse, formatZodErrors, updatePlaylistSchema, createApiResponse } from '@/lib/api-schemas'
 
@@ -12,6 +12,17 @@ export async function GET(
   const { id } = await params
 
   try {
+    // Get authenticated user
+    const supabaseServer = await createServerSupabaseClient()
+    const { data: { user }, error: authError } = await supabaseServer.auth.getUser()
+
+    if (authError || !user) {
+      logger.warn('Unauthorized playlist access attempt', { authError, id })
+      return NextResponse.json(
+        createErrorResponse('Unauthorized', 'You must be logged in to view playlists', 'UNAUTHORIZED'),
+        { status: 401 }
+      )
+    }
 
     // Validate UUID format
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
@@ -23,10 +34,10 @@ export async function GET(
       )
     }
 
-    logger.apiRequest('GET', `/api/playlists/${id}`)
+    logger.apiRequest('GET', `/api/playlists/${id}`, { userId: user.id })
 
     // Get playlist from database
-    const { data: playlist, error: playlistError } = await supabase
+    const { data: playlist, error: playlistError } = await supabaseServer
       .from('playlists')
       .select('*')
       .eq('id', id)
@@ -53,7 +64,7 @@ export async function GET(
     }
 
     // Get playlist tracks with full track data
-    const { data: playlistTracks, error: tracksError } = await supabase
+    const { data: playlistTracks, error: tracksError } = await supabaseServer
       .from('playlist_tracks')
       .select(`
         *,
@@ -107,8 +118,20 @@ export async function PUT(
   const { id } = await params
 
   try {
+    // Get authenticated user
+    const supabaseServer = await createServerSupabaseClient()
+    const { data: { user }, error: authError } = await supabaseServer.auth.getUser()
+
+    if (authError || !user) {
+      logger.warn('Unauthorized playlist update attempt', { authError, id })
+      return NextResponse.json(
+        createErrorResponse('Unauthorized', 'You must be logged in to update playlists', 'UNAUTHORIZED'),
+        { status: 401 }
+      )
+    }
+
     const body = await request.json()
-    
+
     // Validate request body using Zod schema
     const validation = updatePlaylistSchema.safeParse(body)
     if (!validation.success) {
@@ -123,10 +146,10 @@ export async function PUT(
 
     const { name } = validation.data
 
-    logger.apiRequest('PUT', `/api/playlists/${id}`, { name })
+    logger.apiRequest('PUT', `/api/playlists/${id}`, { name, userId: user.id })
 
     // Update playlist in database
-    const { data: updatedPlaylist, error } = await supabase
+    const { data: updatedPlaylist, error } = await supabaseServer
       .from('playlists')
       .update({
         name: name.trim(),

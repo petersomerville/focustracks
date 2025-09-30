@@ -19,7 +19,9 @@ export function usePlaylists() {
           throw new Error(data.error || 'Failed to fetch playlists')
         }
 
-        setPlaylists(data.playlists || [])
+        // API returns { success: true, data: { playlists: ... } }
+        const playlists = data.data?.playlists || data.playlists || []
+        setPlaylists(playlists)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred')
       } finally {
@@ -46,12 +48,14 @@ export function usePlaylists() {
         throw new Error(data.error || 'Failed to create playlist')
       }
 
-      setPlaylists(prev => [data.playlist, ...prev])
-      return { success: true, playlist: data.playlist }
+      // API returns { success: true, data: { playlist: ... } }
+      const playlist = data.data?.playlist || data.playlist
+      setPlaylists(prev => [playlist, ...prev])
+      return { success: true, playlist }
     } catch (err) {
-      return { 
-        success: false, 
-        error: err instanceof Error ? err.message : 'An error occurred' 
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : 'An error occurred'
       }
     }
   }
