@@ -130,7 +130,7 @@ export async function GET(request: NextRequest) {
       logger.debug('Admin role check', { userId: user.id, userProfile, profileError })
 
       if (profileError) {
-        logger.error('Error fetching user profile', { error: profileError })
+        logger.error('Error fetching user profile', profileError)
         return NextResponse.json({ error: 'Failed to verify admin status' }, { status: 500 })
       }
 
