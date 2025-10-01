@@ -2,11 +2,13 @@ import { renderHook, waitFor } from '@testing-library/react'
 import { useTracks } from '../useTracks'
 
 // Mock fetch
-global.fetch = jest.fn()
+global.fetch = jest.fn() as jest.Mock;
 
 describe('useTracks', () => {
+  const mockFetch = global.fetch as jest.Mock;
+
   beforeEach(() => {
-    (fetch as jest.Mock).mockClear()
+    mockFetch.mockClear()
   })
 
   it('fetches tracks successfully', async () => {
@@ -22,7 +24,7 @@ describe('useTracks', () => {
       }
     ]
 
-    ;(fetch as jest.Mock).mockResolvedValueOnce({
+    mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({ tracks: mockTracks })
     })
@@ -38,7 +40,7 @@ describe('useTracks', () => {
   })
 
   it('handles fetch error', async () => {
-    ;(fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'))
+    mockFetch.mockRejectedValueOnce(new Error('Network error'))
 
     const { result } = renderHook(() => useTracks({}))
 
@@ -72,7 +74,7 @@ describe('useTracks', () => {
       }
     ]
 
-    ;(fetch as jest.Mock).mockResolvedValueOnce({
+    mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({ tracks: mockTracks })
     })
@@ -89,7 +91,7 @@ describe('useTracks', () => {
   })
 
   it('applies search filter', async () => {
-    ;(fetch as jest.Mock).mockResolvedValueOnce({
+    mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({ tracks: [] })
     })

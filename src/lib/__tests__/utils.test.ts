@@ -49,8 +49,10 @@ describe('utils', () => {
     })
 
     it('rejects non-string inputs', () => {
-      expect(validateSpotifyUrl(null as unknown as string)).toBe(false)
-      expect(validateSpotifyUrl(undefined as unknown as string)).toBe(false)
+      // @ts-expect-error - testing invalid input type
+      expect(validateSpotifyUrl(null)).toBe(false)
+      // @ts-expect-error - testing invalid input type
+      expect(validateSpotifyUrl(undefined)).toBe(false)
     })
   })
 

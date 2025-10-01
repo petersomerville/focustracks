@@ -8,7 +8,7 @@ jest.mock('@/contexts/AuthContext', () => ({
   useAuth: jest.fn(),
 }))
 
-const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>
+const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
 
 describe('AuthModal', () => {
   const mockOnClose = jest.fn()

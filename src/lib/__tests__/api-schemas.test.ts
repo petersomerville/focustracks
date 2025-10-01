@@ -72,8 +72,8 @@ describe('api-schemas', () => {
     })
 
     it('requires valid genre', () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const submission = { ...validSubmission, genre: 'InvalidGenre' as any }
+      // @ts-expect-error - testing invalid genre type
+      const submission = { ...validSubmission, genre: 'InvalidGenre' }
       const result = createSubmissionSchema.safeParse(submission)
       expect(result.success).toBe(false)
     })

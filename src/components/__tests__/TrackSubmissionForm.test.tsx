@@ -38,6 +38,7 @@ jest.mock('../ContentPolicyModal', () => {
 
 // Mock fetch globally
 global.fetch = jest.fn()
+const mockFetch = global.fetch as jest.Mock
 
 // Helper function to fill form
 async function fillFormWithValidData(user: ReturnType<typeof userEvent.setup>) {
@@ -59,10 +60,13 @@ describe('TrackSubmissionForm', () => {
     access_token: 'mock-token-123'
   }
 
+  const mockUseAuth = useAuth as jest.Mock
+  const mockGetSession = supabase.auth.getSession as jest.Mock
+
   beforeEach(() => {
     jest.clearAllMocks()
-    ;(useAuth as jest.Mock).mockReturnValue({ user: mockUser })
-    ;(supabase.auth.getSession as jest.Mock).mockResolvedValue({
+    mockUseAuth.mockReturnValue({ user: mockUser })
+    mockGetSession.mockResolvedValue({
       data: { session: mockSession }
     })
   })
@@ -82,7 +86,7 @@ describe('TrackSubmissionForm', () => {
     })
 
     it('does not render when user is not authenticated', () => {
-      ;(useAuth as jest.Mock).mockReturnValue({ user: null })
+      mockUseAuth.mockReturnValue({ user: null })
       const { container } = render(<TrackSubmissionForm />)
       expect(container.firstChild).toBeNull()
     })
@@ -139,7 +143,7 @@ describe('TrackSubmissionForm', () => {
   describe('Form Submission', () => {
     it('submits form successfully with valid data', async () => {
       const user = userEvent.setup()
-      ;(global.fetch as jest.Mock).mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => ({ message: 'Track submitted successfully' })
       })
@@ -174,7 +178,7 @@ describe('TrackSubmissionForm', () => {
 
     it('converts duration to seconds before submitting', async () => {
       const user = userEvent.setup()
-      ;(global.fetch as jest.Mock).mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => ({ message: 'Success' })
       })
@@ -196,14 +200,14 @@ describe('TrackSubmissionForm', () => {
         expect(global.fetch).toHaveBeenCalled()
       })
 
-      const fetchCall = (global.fetch as jest.Mock).mock.calls[0]
+      const fetchCall = mockFetch.mock.calls[0]
       const requestBody = JSON.parse(fetchCall[1].body)
       expect(requestBody.duration).toBe(330) // 5:30 = 330 seconds
     })
 
     it('handles API error response', async () => {
       const user = userEvent.setup()
-      ;(global.fetch as jest.Mock).mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: false,
         json: async () => ({ error: 'Failed to submit track' })
       })
@@ -228,7 +232,7 @@ describe('TrackSubmissionForm', () => {
 
     it('disables submit button while submitting', async () => {
       const user = userEvent.setup()
-      ;(global.fetch as jest.Mock).mockImplementationOnce(() =>
+      mockFetch.mockImplementationOnce(() =>
         new Promise(resolve => setTimeout(() => resolve({
           ok: true,
           json: async () => ({ message: 'Success' })
@@ -257,7 +261,7 @@ describe('TrackSubmissionForm', () => {
     it('calls onSubmissionSuccess callback', async () => {
       const mockCallback = jest.fn()
       const user = userEvent.setup()
-      ;(global.fetch as jest.Mock).mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => ({ message: 'Success' })
       })
