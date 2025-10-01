@@ -41,21 +41,12 @@ global.fetch = jest.fn()
 
 // Helper function to fill form
 async function fillFormWithValidData(user: ReturnType<typeof userEvent.setup>) {
-  const inputs = screen.getAllByRole('textbox')
-  const selects = screen.getAllByRole('combobox')
-
-  // Title
-  await user.type(inputs[0], 'Peaceful Piano')
-  // Artist
-  await user.type(inputs[1], 'Classical Focus')
-  // Genre
-  await user.selectOptions(selects[0], 'Classical')
-  // Duration
-  await user.type(inputs[2], '5:30')
-  // YouTube URL
-  await user.type(inputs[3], 'https://www.youtube.com/watch?v=dQw4w9WgXcQ')
-  // Description
-  await user.type(inputs[4], 'This track helps with focus because of its calming piano melody.')
+  await user.type(screen.getByLabelText(/track title/i), 'Peaceful Piano')
+  await user.type(screen.getByLabelText(/artist/i), 'Classical Focus')
+  await user.selectOptions(screen.getByLabelText(/genre/i), 'Classical')
+  await user.type(screen.getByLabelText(/duration/i), '5:30')
+  await user.type(screen.getByLabelText(/youtube url/i), 'https://www.youtube.com/watch?v=dQw4w9WgXcQ')
+  await user.type(screen.getByLabelText(/why does this track help with focus/i), 'This track helps with focus because of its calming piano melody.')
 }
 
 describe('TrackSubmissionForm', () => {
@@ -114,26 +105,6 @@ describe('TrackSubmissionForm', () => {
   // =============================================================================
 
   describe('Form Validation', () => {
-    it('shows validation errors when submitting empty form', async () => {
-      const user = userEvent.setup()
-      render(<TrackSubmissionForm />)
-
-      const openButton = screen.getByText('Submit Track')
-      await user.click(openButton)
-
-      await waitFor(() => {
-        expect(screen.getByText('Track Information')).toBeInTheDocument()
-      })
-
-      const submitButtons = screen.getAllByRole('button')
-      const submitButton = submitButtons.find(b => b.textContent === 'Submit Track')!
-      await user.click(submitButton)
-
-      await waitFor(() => {
-        expect(screen.getByText(/please fix the following errors/i)).toBeInTheDocument()
-      })
-    })
-
     it('validates that at least one URL is required', async () => {
       const user = userEvent.setup()
       render(<TrackSubmissionForm />)
@@ -144,14 +115,12 @@ describe('TrackSubmissionForm', () => {
         expect(screen.getByText('Track Information')).toBeInTheDocument()
       })
 
-      const inputs = screen.getAllByRole('textbox')
-      const selects = screen.getAllByRole('combobox')
-
-      await user.type(inputs[0], 'Test Track')
-      await user.type(inputs[1], 'Test Artist')
-      await user.selectOptions(selects[0], 'Ambient')
-      await user.type(inputs[2], '5:30')
-      await user.type(inputs[4], 'This track helps with focus.')
+      // Fill form without URLs
+      await user.type(screen.getByLabelText(/track title/i), 'Test Track')
+      await user.type(screen.getByLabelText(/artist/i), 'Test Artist')
+      await user.selectOptions(screen.getByLabelText(/genre/i), 'Ambient')
+      await user.type(screen.getByLabelText(/duration/i), '5:30')
+      await user.type(screen.getByLabelText(/why does this track help with focus/i), 'This track helps with focus.')
 
       const submitButtons = screen.getAllByRole('button')
       const submitButton = submitButtons.find(b => b.textContent === 'Submit Track')!

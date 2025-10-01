@@ -199,42 +199,48 @@ export default function TrackSubmissionForm({ onSubmissionSuccess, compact = fal
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">
+                  <label htmlFor="track-title" className="block text-sm font-medium mb-2">
                     Track Title *
                   </label>
                   <input
+                    id="track-title"
                     type="text"
                     value={formData.title}
                     onChange={(e) => handleInputChange('title', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="e.g. Peaceful Piano Study"
                     required
+                    aria-required="true"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">
+                  <label htmlFor="track-artist" className="block text-sm font-medium mb-2">
                     Artist *
                   </label>
                   <input
+                    id="track-artist"
                     type="text"
                     value={formData.artist}
                     onChange={(e) => handleInputChange('artist', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="e.g. Classical Focus"
                     required
+                    aria-required="true"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">
+                  <label htmlFor="track-genre" className="block text-sm font-medium mb-2">
                     Genre *
                   </label>
                   <select
+                    id="track-genre"
                     value={formData.genre}
                     onChange={(e) => handleInputChange('genre', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
+                    aria-required="true"
                   >
                     <option value="">Select a genre</option>
                     {genres.map(genre => (
@@ -244,28 +250,32 @@ export default function TrackSubmissionForm({ onSubmissionSuccess, compact = fal
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">
+                  <label htmlFor="track-duration" className="block text-sm font-medium mb-2">
                     Duration *
                   </label>
                   <input
+                    id="track-duration"
                     type="text"
                     value={formData.duration}
                     onChange={(e) => handleInputChange('duration', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="e.g., 5:30, 1:05:30, or 45"
                     required
+                    aria-required="true"
+                    aria-describedby="duration-help"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p id="duration-help" className="text-xs text-gray-500 mt-1">
                     Enter as mm:ss, hh:mm:ss, or just minutes (e.g., 5:30, 1:05:30, or 45)
                   </p>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">
+                <label htmlFor="track-youtube-url" className="block text-sm font-medium mb-2">
                   YouTube URL
                 </label>
                 <input
+                  id="track-youtube-url"
                   type="url"
                   value={formData.youtube_url}
                   onChange={(e) => handleInputChange('youtube_url', e.target.value)}
@@ -275,10 +285,11 @@ export default function TrackSubmissionForm({ onSubmissionSuccess, compact = fal
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">
+                <label htmlFor="track-spotify-url" className="block text-sm font-medium mb-2">
                   Spotify URL
                 </label>
                 <input
+                  id="track-spotify-url"
                   type="url"
                   value={formData.spotify_url}
                   onChange={(e) => handleInputChange('spotify_url', e.target.value)}
@@ -288,16 +299,18 @@ export default function TrackSubmissionForm({ onSubmissionSuccess, compact = fal
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">
+                <label htmlFor="track-description" className="block text-sm font-medium mb-2">
                   Why does this track help with focus? *
                 </label>
                 <textarea
+                  id="track-description"
                   value={formData.description}
                   onChange={(e) => handleInputChange('description', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   rows={3}
                   placeholder="Describe what makes this track good for focus and productivity..."
                   required
+                  aria-required="true"
                 />
               </div>
 
