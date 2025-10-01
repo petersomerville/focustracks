@@ -42,7 +42,10 @@ export async function PUT(
       return NextResponse.json({ error: 'Invalid authentication' }, { status: 401 })
     }
 
-    const { data: userProfile } = await supabase
+    // Use admin client to verify role and perform operations
+    const supabaseAdmin = createSupabaseAdmin()
+
+    const { data: userProfile } = await supabaseAdmin
       .from('user_profiles')
       .select('role')
       .eq('id', user.id)
@@ -68,7 +71,8 @@ export async function PUT(
 
     const { status, admin_notes } = validation.data
 
-    const { data: submission, error: fetchError } = await supabase
+    // Use admin client for all database operations
+    const { data: submission, error: fetchError } = await supabaseAdmin
       .from('track_submissions')
       .select('*')
       .eq('id', id)
@@ -88,7 +92,7 @@ export async function PUT(
       )
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('track_submissions')
       .update({
         status,
@@ -127,7 +131,7 @@ export async function PUT(
 
       logger.info('Preparing to insert track from approved submission', { trackTitle: trackData.title, artist: trackData.artist })
 
-      const supabaseAdmin = createSupabaseAdmin()
+      // Use the same admin client we created earlier
       const { data: insertedTrack, error: trackError } = await supabaseAdmin
         .from('tracks')
         .insert(trackData)
