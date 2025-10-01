@@ -68,9 +68,15 @@ export default function TrackSubmissionForm({ onSubmissionSuccess, compact = fal
       }
 
       // Convert duration to seconds for API submission
+      // Filter out empty URL strings - Zod expects undefined or valid URL, not empty string
       const submissionData = {
-        ...formData,
-        duration: parseDurationToSeconds(formData.duration)
+        title: formData.title,
+        artist: formData.artist,
+        genre: formData.genre,
+        duration: parseDurationToSeconds(formData.duration),
+        description: formData.description,
+        ...(formData.youtube_url.trim() && { youtube_url: formData.youtube_url.trim() }),
+        ...(formData.spotify_url.trim() && { spotify_url: formData.spotify_url.trim() })
       }
 
       const { data: { session } } = await supabase.auth.getSession()
