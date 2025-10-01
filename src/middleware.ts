@@ -22,8 +22,9 @@ export async function middleware(request: NextRequest) {
       '/api/tracks',
       '/api/playlists',
       '/api/search',
-      '/api/submissions'
-    ].some(route => pathname.startsWith(route) && request.method === 'GET')
+    ].some(route => pathname.startsWith(route) && request.method === 'GET') ||
+    // Allow all methods for submissions (GET, POST)
+    pathname.startsWith('/api/submissions')
     
     if (!skipOriginValidation) {
       // Validate origin for API routes
