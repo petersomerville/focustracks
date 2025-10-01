@@ -38,8 +38,13 @@ Ensure these environment variables are configured:
   - `/api/auth/*` - Authentication endpoints (login, register, logout)
   - `/api/tracks` - Track listing and search
   - `/api/playlists/*` - Playlist CRUD operations
+  - `/api/submissions/*` - Track submission workflow
 - **Database**: Supabase PostgreSQL with real-time capabilities
+  - Row Level Security (RLS) enabled on all tables
+  - See `docs/migrations/README.md` for schema history
+  - See `docs/migrations/archive/` for historical migration scripts
 - **Authentication**: Supabase Auth with email/password
+  - Service role vs anonymous key pattern (see Authentication Patterns below)
 
 ### Key Database Types
 ```typescript
@@ -138,6 +143,10 @@ head -20 README.md | grep -i version
 - API Routes: `src/app/api/endpoint/route.ts`
 - Types: Defined in `src/lib/supabase.ts`
 - Hooks: `src/hooks/useHookName.ts`
+- Documentation: `docs/` directory
+  - `docs/ADRs/` - Architectural Decision Records
+  - `docs/migrations/` - Database migration documentation
+  - `docs/migrations/archive/` - Historical SQL migration scripts
 
 ### Code Standards
 - All new code must be TypeScript with proper typing
@@ -152,6 +161,180 @@ head -20 README.md | grep -i version
 - Track metadata stored in Supabase database
 - YouTube URL validation utilities in `src/lib/youtube-validator.ts`
 - Run `npm run validate-youtube` to check all URLs before deployment
+
+## Authentication Patterns (Lessons Learned)
+
+### When to Use Service Role vs Anonymous Key
+
+**Critical Decision Point**: Supabase provides two client types with different security implications.
+
+#### Anonymous Key Client (Default)
+Use for **user-scoped operations** where RLS policies should be enforced:
+- User viewing their own playlists
+- User submitting tracks
+- User modifying their own data
+- Any operation that should respect Row Level Security
+
+#### Service Role Client (Admin Operations)
+Use for **cross-user operations** that need to bypass RLS policies:
+- Admin approving/rejecting submissions
+- Admin operations affecting multiple users
+- System-level operations
+- Database migrations
+
+#### Implementation Pattern
+
+```typescript
+// Step 1: Verify admin status using anonymous key client
+const { data: { session } } = await supabase.auth.getSession()
+if (!session) {
+  return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+}
+
+const { data: profile } = await supabase
+  .from('user_profiles')
+  .select('role')
+  .eq('user_id', session.user.id)
+  .single()
+
+if (profile?.role !== 'admin') {
+  return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+}
+
+// Step 2: Use service role for admin operations
+const { createClient } = require('@supabase/supabase-js')
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  { auth: { persistSession: false } }
+)
+
+// Step 3: Perform cross-user operation
+const { error } = await supabaseAdmin
+  .from('submissions')
+  .update({ status: 'approved' })
+  .eq('id', submissionId)
+```
+
+**Reference Files**:
+- `src/app/api/submissions/[id]/route.ts` - Admin approval implementation
+- Commit: `92a9f53` - Fix for admin approval 403 errors
+
+---
+
+## Form Validation Patterns (Lessons Learned)
+
+### Optional URL Fields and Zod Schemas
+
+**Problem**: Zod schemas expect `undefined` for optional fields, but HTML forms submit empty strings `""`.
+
+**Solution**: Filter out empty strings before API submission.
+
+#### Implementation Pattern
+
+```typescript
+// ❌ WRONG - Sends empty strings to Zod schema
+const submissionData = {
+  title: formData.title,
+  youtube_url: formData.youtube_url,  // May be ""
+  spotify_url: formData.spotify_url   // May be ""
+}
+
+// ✅ CORRECT - Conditionally include only truthy values
+const submissionData = {
+  title: formData.title,
+  artist: formData.artist,
+  genre: formData.genre,
+  duration: parseDurationToSeconds(formData.duration),
+  description: formData.description,
+  // Only spread if value exists after trimming
+  ...(formData.youtube_url.trim() && { youtube_url: formData.youtube_url.trim() }),
+  ...(formData.spotify_url.trim() && { spotify_url: formData.spotify_url.trim() })
+}
+```
+
+**Why This Matters**:
+- Zod's `.optional()` means "field can be undefined"
+- Empty string `""` is NOT undefined
+- This causes validation failures: "Expected undefined, received string"
+
+**Reference Files**:
+- `src/components/TrackSubmissionForm.tsx:72-80` - Correct implementation
+- `src/lib/api-schemas.ts:104-114` - Schema definition with refinement
+- Commit: `92a9f53` - Fix for track submission validation
+
+---
+
+## Testing Requirements (Lessons Learned)
+
+### Test Coverage Standards
+
+**Minimum Coverage Thresholds**:
+- **Utility functions**: 90%+ coverage (`src/lib/**`)
+- **API schemas**: 90%+ coverage (`src/lib/api-schemas.ts`)
+- **Components**: 80%+ coverage (`src/components/**`)
+- **API routes**: 70%+ coverage (`src/app/api/**`)
+
+### Test-First Development Approach
+
+**SOP**: Write tests BEFORE marking features complete:
+
+1. **Write failing test** describing desired behavior
+2. **Implement feature** to make test pass
+3. **Refactor** with tests as safety net
+4. **Verify coverage** meets threshold
+
+### Accessibility Testing Requirements
+
+**All forms MUST pass accessibility tests**:
+
+```typescript
+// ✅ CORRECT - Use getByLabelText (requires proper labels)
+const titleInput = screen.getByLabelText(/track title/i)
+
+// ❌ WRONG - Don't use getByPlaceholderText (accessibility anti-pattern)
+const titleInput = screen.getByPlaceholderText('Enter title')
+```
+
+**Required Attributes**:
+- Every `<input>` must have associated `<label>` with `htmlFor`
+- Input must have `id` matching label's `htmlFor`
+- Required fields must have `aria-required="true"`
+- Form sections should use `<fieldset>` and `<legend>`
+
+**Reference Files**:
+- `src/components/__tests__/TrackSubmissionForm.test.tsx` - Accessibility test examples
+- `src/components/TrackSubmissionForm.tsx:202-230` - Proper label implementation
+
+### Test Organization
+
+Use descriptive `describe` blocks to organize tests:
+
+```typescript
+describe('ComponentName', () => {
+  describe('Rendering', () => {
+    // Tests for initial render, conditional rendering
+  })
+
+  describe('Accessibility', () => {
+    // Tests for ARIA labels, keyboard navigation
+  })
+
+  describe('Form Validation', () => {
+    // Tests for validation rules, error messages
+  })
+
+  describe('User Interactions', () => {
+    // Tests for clicks, typing, form submission
+  })
+
+  describe('API Integration', () => {
+    // Tests for successful/failed API calls
+  })
+})
+```
+
+---
 
 ## Project Context
 
