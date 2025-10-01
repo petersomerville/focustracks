@@ -26,7 +26,7 @@ describe('useTracks', () => {
 
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ tracks: mockTracks })
+      json: async () => ({ data: { tracks: mockTracks } })
     })
 
     const { result } = renderHook(() => useTracks({}))
@@ -76,7 +76,7 @@ describe('useTracks', () => {
 
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ tracks: mockTracks })
+      json: async () => ({ data: { tracks: mockTracks } })
     })
 
     const { result } = renderHook(() => useTracks({ genre: 'Ambient' }))
@@ -93,7 +93,7 @@ describe('useTracks', () => {
   it('applies search filter', async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ tracks: [] })
+      json: async () => ({ data: { tracks: [] } })
     })
 
     const { result } = renderHook(() => useTracks({ search: 'test' }))
