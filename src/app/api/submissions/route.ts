@@ -16,6 +16,11 @@ const getUserClient = (token: string) => {
       headers: {
         Authorization: `Bearer ${token}`
       }
+    },
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false
     }
   })
 }
