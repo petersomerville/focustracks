@@ -1,0 +1,17 @@
+echo "🔍 Running pre-commit checks..."
+
+# Run linter
+echo "  Running ESLint..."
+npm run lint || {
+  echo "❌ Linting failed. Please fix errors before committing."
+  exit 1
+}
+
+# Run tests
+echo "  Running tests..."
+npm test -- --passWithNoTests --bail || {
+  echo "❌ Tests failed. Please fix before committing."
+  exit 1
+}
+
+echo "✅ Pre-commit checks passed!"
