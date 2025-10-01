@@ -46,6 +46,9 @@ export function parseDurationToSeconds(durationString: string): number {
   // Handle various formats: "5:30", "1:05:30", "90" (minutes), etc.
   const parts = durationString.split(':').map(part => parseInt(part.trim(), 10))
 
+  // Check for NaN values in parsed parts
+  if (parts.some(part => isNaN(part))) return 0
+
   if (parts.length === 1) {
     // Single number - assume minutes
     return parts[0] * 60

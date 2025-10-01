@@ -146,9 +146,9 @@ export const submissionResponseSchema = z.object({
  */
 export const createPlaylistSchema = z.object({
   name: z.string()
+    .trim()
     .min(1, 'Playlist name is required')
-    .max(100, 'Playlist name cannot exceed 100 characters')
-    .trim(),
+    .max(100, 'Playlist name cannot exceed 100 characters'),
 })
 
 /**
@@ -156,9 +156,9 @@ export const createPlaylistSchema = z.object({
  */
 export const updatePlaylistSchema = z.object({
   name: z.string()
+    .trim()
     .min(1, 'Playlist name is required')
-    .max(100, 'Playlist name cannot exceed 100 characters')
-    .trim(),
+    .max(100, 'Playlist name cannot exceed 100 characters'),
 })
 
 /**
