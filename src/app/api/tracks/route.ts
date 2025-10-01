@@ -65,7 +65,8 @@ export async function GET(request: NextRequest) {
     const duration = Date.now() - startTime
 
     if (error) {
-      logger.error('Database query failed', error, {
+      logger.error('Database query failed', {
+        error,
         genre,
         search,
         duration
@@ -98,7 +99,7 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     const duration = Date.now() - startTime
-    logger.error('Unexpected error in tracks API', error instanceof Error ? error : String(error))
+    logger.error('Unexpected error in tracks API', { error: error instanceof Error ? error : String(error) })
     logger.apiResponse('GET', '/api/tracks', 500, duration)
 
     return NextResponse.json(

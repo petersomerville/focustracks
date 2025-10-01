@@ -9,13 +9,13 @@ export async function POST(_request: NextRequest) {
     const { error } = await supabase.auth.signOut()
 
     if (error) {
-      logger.error('Logout error', error)
+      logger.error('Logout error', { error })
       return NextResponse.json({ error: error.message }, { status: 400 })
     }
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    logger.error('Unexpected error during logout', error instanceof Error ? error : String(error))
+    logger.error('Unexpected error during logout', { error: error instanceof Error ? error : String(error) })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

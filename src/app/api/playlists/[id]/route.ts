@@ -55,7 +55,7 @@ export async function GET(
         )
       }
 
-      logger.error('Database query failed', playlistError, { id, duration })
+      logger.error('Database query failed', { error: playlistError, id, duration })
       logger.apiResponse('GET', `/api/playlists/${id}`, 500, duration)
       return NextResponse.json(
         createErrorResponse('Failed to fetch playlist', 'Database query error', 'DATABASE_ERROR'),
@@ -74,7 +74,7 @@ export async function GET(
       .order('position', { ascending: true })
 
     if (tracksError) {
-      logger.error('Failed to fetch playlist tracks', tracksError, { id })
+      logger.error('Failed to fetch playlist tracks', { error: tracksError, id })
       return NextResponse.json(
         createErrorResponse('Failed to fetch playlist tracks', 'Database query error', 'DATABASE_ERROR'),
         { status: 500 }
@@ -99,7 +99,7 @@ export async function GET(
     return NextResponse.json(response)
   } catch (error) {
     const duration = Date.now() - startTime
-    logger.error('Unexpected error fetching playlist', error instanceof Error ? error : String(error))
+    logger.error('Unexpected error fetching playlist', { error: error instanceof Error ? error : String(error) })
     logger.apiResponse('GET', `/api/playlists/${id}`, 500, duration)
 
     return NextResponse.json(
@@ -171,7 +171,7 @@ export async function PUT(
         )
       }
 
-      logger.error('Database update failed', error, { id, name, duration })
+      logger.error('Database update failed', { error, id, name, duration })
       logger.apiResponse('PUT', `/api/playlists/${id}`, 500, duration)
       return NextResponse.json(
         createErrorResponse('Failed to update playlist', 'Database update error', 'DATABASE_ERROR'),
@@ -186,7 +186,7 @@ export async function PUT(
     return NextResponse.json(response)
   } catch (error) {
     const duration = Date.now() - startTime
-    logger.error('Unexpected error updating playlist', error instanceof Error ? error : String(error))
+    logger.error('Unexpected error updating playlist', { error: error instanceof Error ? error : String(error) })
     logger.apiResponse('PUT', `/api/playlists/${id}`, 500, duration)
 
     return NextResponse.json(
@@ -216,7 +216,7 @@ export async function DELETE(
       .eq('playlist_id', id)
 
     if (tracksError) {
-      logger.error('Failed to delete playlist tracks', tracksError, { id })
+      logger.error('Failed to delete playlist tracks', { error: tracksError, id })
       return NextResponse.json(
         createErrorResponse('Failed to delete playlist tracks', 'Database delete error', 'DATABASE_ERROR'),
         { status: 500 }
@@ -232,7 +232,7 @@ export async function DELETE(
     const duration = Date.now() - startTime
 
     if (error) {
-      logger.error('Database delete failed', error, { id, duration })
+      logger.error('Database delete failed', { error, id, duration })
       logger.apiResponse('DELETE', `/api/playlists/${id}`, 500, duration)
       return NextResponse.json(
         createErrorResponse('Failed to delete playlist', 'Database delete error', 'DATABASE_ERROR'),
@@ -247,7 +247,7 @@ export async function DELETE(
     return NextResponse.json(response)
   } catch (error) {
     const duration = Date.now() - startTime
-    logger.error('Unexpected error deleting playlist', error instanceof Error ? error : String(error))
+    logger.error('Unexpected error deleting playlist', { error: error instanceof Error ? error : String(error) })
     logger.apiResponse('DELETE', `/api/playlists/${id}`, 500, duration)
 
     return NextResponse.json(

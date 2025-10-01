@@ -94,11 +94,12 @@ export async function withRetry<T>(
     }
   }
 
-      logger.error('Operation failed after all retries', lastError instanceof Error ? lastError : String(lastError), { 
-        maxRetries: config.maxRetries, 
-        errorMessage: lastError instanceof Error ? lastError.message : String(lastError) 
-      })
-  
+  logger.error('Operation failed after all retries', {
+    error: lastError instanceof Error ? lastError : String(lastError),
+    maxRetries: config.maxRetries,
+    errorMessage: lastError instanceof Error ? lastError.message : String(lastError)
+  })
+
   throw lastError
 }
 
@@ -114,7 +115,8 @@ export async function withErrorRecovery<T>(
   try {
     return await withRetry(fn, retryOptions)
   } catch (error) {
-    logger.error('All retry attempts failed', error instanceof Error ? error : String(error), { 
+    logger.error('All retry attempts failed', {
+      error: error instanceof Error ? error : String(error),
       errorMessage: error instanceof Error ? error.message : String(error),
       hasFallback: fallbackValue !== undefined
     })

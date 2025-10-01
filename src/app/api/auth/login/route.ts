@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (error) {
-      logger.error('Login error', error)
+      logger.error('Login error', { error })
       return NextResponse.json(
         createErrorResponse('Authentication failed', error.message, 'AUTH_ERROR'),
         { status: 400 }
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ user: data.user })
   } catch (error) {
-    logger.error('Unexpected error during login', error instanceof Error ? error : String(error))
+    logger.error('Unexpected error during login', { error: error instanceof Error ? error : String(error) })
     return NextResponse.json(
       createErrorResponse('Internal server error', 'An unexpected error occurred', 'INTERNAL_ERROR'),
       { status: 500 }

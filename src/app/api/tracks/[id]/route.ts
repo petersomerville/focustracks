@@ -46,7 +46,7 @@ export async function GET(
         )
       }
 
-      logger.error('Database query failed', error, { id, duration })
+      logger.error('Database query failed', { error, id, duration })
       logger.apiResponse('GET', `/api/tracks/${id}`, 500, duration)
       return NextResponse.json(
         createErrorResponse('Failed to fetch track', 'Database query error', 'DATABASE_ERROR'),
@@ -62,7 +62,7 @@ export async function GET(
 
   } catch (error) {
     const duration = Date.now() - startTime
-    logger.error('Unexpected error in track details API', error instanceof Error ? error : String(error))
+    logger.error('Unexpected error in track details API', { error: error instanceof Error ? error : String(error) })
     logger.apiResponse('GET', `/api/tracks/${id}`, 500, duration)
 
     return NextResponse.json(

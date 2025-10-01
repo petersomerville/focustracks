@@ -195,15 +195,25 @@ class Logger {
 
   /**
    * Warning level logging
+   *
+   * @example
+   * logger.warn('Operation failed', { userId: '123', attempts: 3 })
+   * logger.warn('Connection error', { error: err, endpoint: '/api/data' })
    */
-  warn(message: string, metadata?: Record<string, unknown>, error?: Error | string): void {
+  warn(message: string, metadata?: Record<string, unknown>): void {
+    const error = metadata?.error as Error | string | undefined
     this.output(this.createEntry('warn', message, metadata, error))
   }
 
   /**
    * Error level logging
+   *
+   * @example
+   * logger.error('Database query failed', { error: err, query: 'SELECT *' })
+   * logger.error('Unexpected error', { error: err })
    */
-  error(message: string, error?: Error | string, metadata?: Record<string, unknown>): void {
+  error(message: string, metadata?: Record<string, unknown>): void {
+    const error = metadata?.error as Error | string | undefined
     this.output(this.createEntry('error', message, metadata, error))
   }
 
@@ -233,7 +243,7 @@ class Logger {
     }
 
     if (status >= 400) {
-      this.error(message, undefined, metadata)
+      this.error(message, metadata)
     } else {
       this.info(message, metadata)
     }
@@ -311,14 +321,14 @@ export const info = (message: string, metadata?: Record<string, unknown>) =>
 /**
  * Quick warning logging
  */
-export const warn = (message: string, metadata?: Record<string, unknown>, error?: Error | string) =>
-  logger.warn(message, metadata, error)
+export const warn = (message: string, metadata?: Record<string, unknown>) =>
+  logger.warn(message, metadata)
 
 /**
  * Quick error logging
  */
-export const error = (message: string, err?: Error | string, metadata?: Record<string, unknown>) =>
-  logger.error(message, err, metadata)
+export const error = (message: string, metadata?: Record<string, unknown>) =>
+  logger.error(message, metadata)
 
 // =============================================================================
 // Migration Helper: Replace console.log
@@ -345,10 +355,10 @@ export const log = (message: unknown, ...args: unknown[]) => {
  */
 export const logError = (message: unknown, ...args: unknown[]) => {
   if (message instanceof Error) {
-    logger.error(message.message, message, args.length > 0 ? { args } : undefined)
+    logger.error(message.message, { error: message, ...(args.length > 0 ? { args } : {}) })
   } else if (typeof message === 'string') {
-    logger.error(message, undefined, args.length > 0 ? { args } : undefined)
+    logger.error(message, args.length > 0 ? { args } : undefined)
   } else {
-    logger.error('Console error output', undefined, { message, args })
+    logger.error('Console error output', { message, args })
   }
 }

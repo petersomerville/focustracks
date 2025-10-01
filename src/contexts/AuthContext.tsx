@@ -62,7 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (errorMessage.includes('Failed to fetch') || errorMessage.includes('ERR_INSUFFICIENT_RESOURCES')) {
         logger.warn('Network error fetching user role, defaulting to user', { error: errorMessage })
       } else {
-        logger.error('Unexpected error fetching user role', errorMessage)
+        logger.error('Unexpected error fetching user role', { error: errorMessage })
       }
       return 'user'
     }
@@ -125,7 +125,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
       return { error: error?.message ?? null }
     } catch (error) {
-      logger.error('SignIn error', error instanceof Error ? error : String(error))
+      logger.error('SignIn error', { error: error instanceof Error ? error : String(error) })
       return { error: 'An unexpected error occurred' }
     }
   }, [logger])
@@ -138,7 +138,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
       return { error: error?.message ?? null }
     } catch (error) {
-      logger.error('SignUp error', error instanceof Error ? error : String(error))
+      logger.error('SignUp error', { error: error instanceof Error ? error : String(error) })
       return { error: 'An unexpected error occurred' }
     }
   }, [logger])

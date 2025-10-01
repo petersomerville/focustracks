@@ -95,7 +95,7 @@ export async function POST(
     const duration = Date.now() - startTime
 
     if (error) {
-      logger.error('Database insert failed', error, { playlistId: id, trackId: track_id, duration })
+      logger.error('Database insert failed', { error, playlistId: id, trackId: track_id, duration })
       logger.apiResponse('POST', `/api/playlists/${id}/tracks`, 500, duration)
       return NextResponse.json(
         createErrorResponse('Failed to add track to playlist', 'Database insert error', 'DATABASE_ERROR'),
@@ -110,7 +110,7 @@ export async function POST(
     return NextResponse.json(response, { status: 201 })
   } catch (error) {
     const duration = Date.now() - startTime
-    logger.error('Unexpected error adding track to playlist', error instanceof Error ? error : String(error))
+    logger.error('Unexpected error adding track to playlist', { error: error instanceof Error ? error : String(error) })
     logger.apiResponse('POST', `/api/playlists/${id}/tracks`, 500, duration)
 
     return NextResponse.json(
@@ -183,7 +183,7 @@ export async function DELETE(
     const duration = Date.now() - startTime
 
     if (error) {
-      logger.error('Database delete failed', error, { playlistId: id, trackId: track_id, duration })
+      logger.error('Database delete failed', { error, playlistId: id, trackId: track_id, duration })
       logger.apiResponse('DELETE', `/api/playlists/${id}/tracks`, 500, duration)
       return NextResponse.json(
         createErrorResponse('Failed to remove track from playlist', 'Database delete error', 'DATABASE_ERROR'),
@@ -198,7 +198,7 @@ export async function DELETE(
     return NextResponse.json(response)
   } catch (error) {
     const duration = Date.now() - startTime
-    logger.error('Unexpected error removing track from playlist', error instanceof Error ? error : String(error))
+    logger.error('Unexpected error removing track from playlist', { error: error instanceof Error ? error : String(error) })
     logger.apiResponse('DELETE', `/api/playlists/${id}/tracks`, 500, duration)
 
     return NextResponse.json(
@@ -277,7 +277,7 @@ export async function PUT(
     const duration = Date.now() - startTime
 
     if (error) {
-      logger.error('Database update failed', error, { playlistId: id, trackId: track_id, newPosition: new_position, duration })
+      logger.error('Database update failed', { error, playlistId: id, trackId: track_id, newPosition: new_position, duration })
       logger.apiResponse('PUT', `/api/playlists/${id}/tracks`, 500, duration)
       return NextResponse.json(
         createErrorResponse('Failed to reorder track', 'Database update error', 'DATABASE_ERROR'),
@@ -292,7 +292,7 @@ export async function PUT(
     return NextResponse.json(response)
   } catch (error) {
     const duration = Date.now() - startTime
-    logger.error('Unexpected error reordering tracks in playlist', error instanceof Error ? error : String(error))
+    logger.error('Unexpected error reordering tracks in playlist', { error: error instanceof Error ? error : String(error) })
     logger.apiResponse('PUT', `/api/playlists/${id}/tracks`, 500, duration)
 
     return NextResponse.json(

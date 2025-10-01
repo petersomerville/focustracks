@@ -44,7 +44,7 @@ export default function ProfilePage() {
       logger.info('Profile updated successfully')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save profile')
-      logger.error('Error saving profile', err instanceof Error ? err : String(err))
+      logger.error('Error saving profile', { error: err instanceof Error ? err : String(err) })
     } finally {
       setSaving(false)
     }

@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
       const { data: tracks, error: tracksError, count: tracksCount } = await tracksQuery
 
       if (tracksError) {
-        logger.error('Tracks search failed', tracksError, { q, genre })
+        logger.error('Tracks search failed', { error: tracksError, q, genre })
         return NextResponse.json(
           createErrorResponse('Search failed', 'Database query error', 'DATABASE_ERROR'),
           { status: 500 }
@@ -114,7 +114,7 @@ export async function GET(request: NextRequest) {
       const { data: playlists, error: playlistsError, count: playlistsCount } = await playlistsQuery
 
       if (playlistsError) {
-        logger.error('Playlists search failed', playlistsError, { q })
+        logger.error('Playlists search failed', { error: playlistsError, q })
         return NextResponse.json(
           createErrorResponse('Search failed', 'Database query error', 'DATABASE_ERROR'),
           { status: 500 }
@@ -145,7 +145,7 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     const duration = Date.now() - startTime
-    logger.error('Unexpected error in search API', error instanceof Error ? error : String(error))
+    logger.error('Unexpected error in search API', { error: error instanceof Error ? error : String(error) })
     logger.apiResponse('GET', '/api/search', 500, duration)
 
     return NextResponse.json(

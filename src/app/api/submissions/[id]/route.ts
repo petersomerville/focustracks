@@ -100,7 +100,7 @@ export async function PUT(
       .single()
 
     if (error) {
-      logger.error('Database error updating submission', error)
+      logger.error('Database error updating submission', { error })
       return NextResponse.json(
         createErrorResponse('Failed to update submission', 'Database error occurred', 'DATABASE_ERROR'),
         { status: 500 }
@@ -134,7 +134,7 @@ export async function PUT(
         .select()
 
       if (trackError) {
-        logger.error('Failed to create track from submission', trackError, { trackData })
+        logger.error('Failed to create track from submission', { error: trackError, trackData })
         return NextResponse.json(
           createErrorResponse('Submission approved but failed to create track', trackError.message, 'TRACK_CREATION_ERROR'),
           { status: 500 }
@@ -149,7 +149,7 @@ export async function PUT(
       submission: data
     })
   } catch (error) {
-    logger.error('Unexpected error in submission update', error instanceof Error ? error : String(error))
+    logger.error('Unexpected error in submission update', { error: error instanceof Error ? error : String(error) })
     return NextResponse.json(
       createErrorResponse('Internal server error', 'An unexpected error occurred', 'INTERNAL_ERROR'),
       { status: 500 }

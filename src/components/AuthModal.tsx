@@ -91,7 +91,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
         }
       }
     } catch (err) {
-      logger.error('Auth error', err instanceof Error ? err : String(err))
+      logger.error('Auth error', { error: err instanceof Error ? err : String(err) })
       setError('An unexpected error occurred')
     } finally {
       setLoading(false)

@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      logger.error('Database error creating submission', error)
+      logger.error('Database error creating submission', { error })
       return NextResponse.json(
         createErrorResponse('Failed to submit track', 'Database error occurred', 'DATABASE_ERROR'),
         { status: 500 }
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
       submission: data
     })
   } catch (error) {
-    logger.error('Unexpected error creating submission', error instanceof Error ? error : String(error))
+    logger.error('Unexpected error creating submission', { error: error instanceof Error ? error : String(error) })
     return NextResponse.json(
       createErrorResponse('Internal server error', 'An unexpected error occurred', 'INTERNAL_ERROR'),
       { status: 500 }
@@ -135,7 +135,7 @@ export async function GET(request: NextRequest) {
         logger.debug('Admin role check', { userId: user.id, userProfile, profileError })
 
         if (profileError) {
-          logger.error('Error fetching user profile', profileError.message || String(profileError))
+          logger.error('Error fetching user profile', { error: profileError.message || String(profileError) })
           return NextResponse.json({ error: 'Failed to verify admin status' }, { status: 500 })
         }
 
@@ -158,7 +158,7 @@ export async function GET(request: NextRequest) {
         const { data, error } = await query
 
         if (error) {
-          logger.error('Database error fetching admin submissions', error)
+          logger.error('Database error fetching admin submissions', { error })
           return NextResponse.json(
             createErrorResponse('Failed to fetch submissions', 'Database error occurred', 'DATABASE_ERROR'),
             { status: 500 }
@@ -190,7 +190,7 @@ export async function GET(request: NextRequest) {
       const { data, error } = await query
 
       if (error) {
-        logger.error('Database error fetching user submissions', error)
+        logger.error('Database error fetching user submissions', { error })
         return NextResponse.json(
           createErrorResponse('Failed to fetch submissions', 'Database error occurred', 'DATABASE_ERROR'),
           { status: 500 }
@@ -200,7 +200,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ submissions: data })
     }
   } catch (error) {
-    logger.error('Unexpected error fetching submissions', error instanceof Error ? error : String(error))
+    logger.error('Unexpected error fetching submissions', { error: error instanceof Error ? error : String(error) })
     return NextResponse.json(
       createErrorResponse('Internal server error', 'An unexpected error occurred', 'INTERNAL_ERROR'),
       { status: 500 }

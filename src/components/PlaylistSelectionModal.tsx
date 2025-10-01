@@ -35,7 +35,7 @@ export default function PlaylistSelectionModal({
       const playlistsData = data.data?.playlists || data.playlists || []
       setPlaylists(playlistsData)
     } catch (error) {
-      logger.error('Error fetching playlists', error instanceof Error ? error : String(error))
+      logger.error('Error fetching playlists', { error: error instanceof Error ? error : String(error) })
     } finally {
       setLoading(false)
     }
@@ -70,7 +70,7 @@ export default function PlaylistSelectionModal({
         alert(error.error || 'Failed to add track to playlist')
       }
     } catch (error) {
-      logger.error('Error adding track to playlist', error instanceof Error ? error : String(error))
+      logger.error('Error adding track to playlist', { error: error instanceof Error ? error : String(error) })
       alert('Failed to add track to playlist')
     } finally {
       setAddingToPlaylist(null)
@@ -111,7 +111,7 @@ export default function PlaylistSelectionModal({
         alert(error.error || 'Failed to create playlist')
       }
     } catch (error) {
-      logger.error('Error creating playlist', error instanceof Error ? error : String(error))
+      logger.error('Error creating playlist', { error: error instanceof Error ? error : String(error) })
       alert('Failed to create playlist')
     } finally {
       setCreatingPlaylist(false)

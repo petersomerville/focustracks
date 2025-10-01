@@ -32,7 +32,7 @@ export async function GET(_request: NextRequest) {
     const duration = Date.now() - startTime
 
     if (error) {
-      logger.error('Database query failed', error, { duration })
+      logger.error('Database query failed', { error, duration })
       logger.apiResponse('GET', '/api/playlists', 500, duration)
       return NextResponse.json(
         createErrorResponse('Failed to fetch playlists', 'Database query error', 'DATABASE_ERROR'),
@@ -47,7 +47,7 @@ export async function GET(_request: NextRequest) {
     return NextResponse.json(response)
   } catch (error) {
     const duration = Date.now() - startTime
-    logger.error('Unexpected error fetching playlists', error instanceof Error ? error : String(error))
+    logger.error('Unexpected error fetching playlists', { error: error instanceof Error ? error : String(error) })
     logger.apiResponse('GET', '/api/playlists', 500, duration)
 
     return NextResponse.json(
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
     const duration = Date.now() - startTime
 
     if (error) {
-      logger.error('Database insert failed', error, { name, duration })
+      logger.error('Database insert failed', { error, name, duration })
       logger.apiResponse('POST', '/api/playlists', 500, duration)
       return NextResponse.json(
         createErrorResponse('Failed to create playlist', 'Database insert error', 'DATABASE_ERROR'),
@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(response, { status: 201 })
   } catch (error) {
     const duration = Date.now() - startTime
-    logger.error('Unexpected error creating playlist', error instanceof Error ? error : String(error))
+    logger.error('Unexpected error creating playlist', { error: error instanceof Error ? error : String(error) })
     logger.apiResponse('POST', '/api/playlists', 500, duration)
 
     return NextResponse.json(

@@ -121,7 +121,7 @@ export default function TrackSubmissionForm({ onSubmissionSuccess, compact = fal
       setIsOpen(false)
       onSubmissionSuccess?.()
     } catch (error) {
-      logger.error('Submission error', error instanceof Error ? error : String(error))
+      logger.error('Submission error', { error: error instanceof Error ? error : String(error) })
       if (error instanceof Error) {
         if (error.name === 'AbortError') {
           toast.error('Request timed out. Please try again.')

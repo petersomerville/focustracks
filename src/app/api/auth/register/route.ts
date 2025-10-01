@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (error) {
-      logger.error('Registration error', error)
+      logger.error('Registration error', { error })
       return NextResponse.json(
         createErrorResponse('Registration failed', error.message, 'REGISTRATION_ERROR'),
         { status: 400 }
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ user: data.user })
   } catch (error) {
-    logger.error('Unexpected error during registration', error instanceof Error ? error : String(error))
+    logger.error('Unexpected error during registration', { error: error instanceof Error ? error : String(error) })
     return NextResponse.json(
       createErrorResponse('Internal server error', 'An unexpected error occurred', 'INTERNAL_ERROR'),
       { status: 500 }

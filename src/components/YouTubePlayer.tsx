@@ -138,7 +138,7 @@ export default function YouTubePlayer({
             }
           },
           onError: (event: YT.OnErrorEvent) => {
-            logger.error('YouTube player error occurred', String(event.data), { errorCode: event.data })
+            logger.error('YouTube player error occurred', { error: String(event.data), errorCode: event.data })
           }
         }
       })
@@ -154,7 +154,7 @@ export default function YouTubePlayer({
           playerInstanceRef.current = null
           setPlayer(null)
         } catch (error) {
-          logger.error('Error destroying YouTube player', error instanceof Error ? error : String(error))
+          logger.error('Error destroying YouTube player', { error: error instanceof Error ? error : String(error) })
         }
       }
     }
@@ -177,14 +177,16 @@ export default function YouTubePlayer({
             player.playVideo()
           }
         } catch (error) {
-          logger.error('Failed to load YouTube video', error instanceof Error ? error : String(error), {
+          logger.error('Failed to load YouTube video', {
+            error: error instanceof Error ? error : String(error),
             videoId,
             trackTitle: track.title,
             youtubeUrl: track.youtube_url
           })
         }
       } else {
-        logger.error('Could not extract valid video ID from YouTube URL', track.youtube_url, {
+        logger.error('Could not extract valid video ID from YouTube URL', {
+          error: track.youtube_url,
           trackTitle: track.title,
           youtubeUrl: track.youtube_url
         })

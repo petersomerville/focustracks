@@ -85,7 +85,7 @@ export default function PlaylistDetailPage() {
         alert(error.error || 'Failed to remove track from playlist')
       }
     } catch (error) {
-      logger.error('Error removing track from playlist', error instanceof Error ? error : String(error))
+      logger.error('Error removing track from playlist', { error: error instanceof Error ? error : String(error) })
       alert('Failed to remove track from playlist')
     } finally {
       setDeletingTrack(null)
