@@ -1,6 +1,6 @@
 # GitHub Secrets Setup Guide
 
-This document explains how to configure GitHub repository secrets required for CI/CD pipeline.
+This document explains how to configure GitHub repository secrets required for the CI/CD pipeline.
 
 ## Required Secrets
 
