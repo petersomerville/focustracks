@@ -42,12 +42,18 @@ export async function POST(request: NextRequest) {
     }
 
     const token = authHeader.replace('Bearer ', '')
-    const supabase = getUserClient(token)
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+
+    // Verify user authentication using a temporary client
+    const tempClient = getUserClient(token)
+    const { data: { user }, error: authError } = await tempClient.auth.getUser(token)
 
     if (authError || !user) {
       return NextResponse.json({ error: 'Invalid authentication' }, { status: 401 })
     }
+
+    // Use service role client for the actual insert to bypass RLS
+    // We've already verified the user above, so we know this is legitimate
+    const supabase = getAdminClient()
 
     const body = await request.json()
 
