@@ -138,10 +138,10 @@ export default function PlaylistSelectionModal({
 
         {/* Track Info */}
         {track && (
-          <div className="p-4 bg-gray-50 dark:bg-gray-700">
-            <p className="text-sm text-gray-600 dark:text-gray-400">Adding track:</p>
-            <p className="font-medium text-gray-900 dark:text-gray-100">{track.title}</p>
-            <p className="text-sm text-gray-600 dark:text-gray-400">{track.artist}</p>
+          <div className="p-4 bg-muted/50">
+            <p className="text-sm text-muted-foreground">Adding track:</p>
+            <p className="font-medium text-foreground">{track.title}</p>
+            <p className="text-sm text-muted-foreground">{track.artist}</p>
           </div>
         )}
 
@@ -188,7 +188,7 @@ export default function PlaylistSelectionModal({
                           setShowCreateForm(false)
                           setNewPlaylistName('')
                         }}
-                        className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                      className="px-3 py-2 border border-input rounded-md hover:bg-muted transition-colors"
                       >
                         Cancel
                       </button>
@@ -208,7 +208,7 @@ export default function PlaylistSelectionModal({
                       key={playlist.id}
                       onClick={() => handleAddToPlaylist(playlist.id)}
                       disabled={addingToPlaylist === playlist.id}
-                      className="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors disabled:opacity-50"
+                      className="w-full flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors disabled:opacity-50"
                     >
                       <div className="text-left">
                         <p className="font-medium text-gray-900 dark:text-gray-100">

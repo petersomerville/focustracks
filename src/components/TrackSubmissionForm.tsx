@@ -162,7 +162,7 @@ export default function TrackSubmissionForm({ onSubmissionSuccess, compact = fal
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className={`flex items-center ${compact ? 'p-2' : 'space-x-1 px-3 py-1'} text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors`}>
+        <Button variant="outline" size={compact ? "icon" : "sm"} className="flex items-center">
           <Plus className="h-4 w-4" />
           {!compact && <span>Submit Track</span>}
         </Button>
