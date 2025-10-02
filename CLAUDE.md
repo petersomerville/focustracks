@@ -336,6 +336,170 @@ describe('ComponentName', () => {
 
 ---
 
+## API Route Testing Patterns (Lessons Learned)
+
+### Test Infrastructure
+
+**Mock Framework**: Built custom Supabase mocking infrastructure for isolated API route testing.
+
+**Key Files**:
+- `src/__tests__/helpers/supabase-mock.ts` - Mock Supabase client with chainable query builder
+- `src/__tests__/helpers/api-test-utils.ts` - Utilities for creating requests and parsing responses
+- Mock data factories for User, Track, Playlist, PlaylistTrack
+
+### Testing Next.js 15 API Routes
+
+**Environment Configuration**: API routes require `node` environment, while components need `jsdom`.
+
+```typescript
+/**
+ * @jest-environment node
+ */
+```
+
+Add this docblock to API route test files to override the default `jsdom` environment.
+
+### Test Organization Pattern
+
+```typescript
+describe('/api/endpoint/[id]', () => {
+  let mockSupabase: MockSupabaseClient
+  const { createServerSupabaseClient } = require('@/lib/supabase-server')
+
+  beforeEach(() => {
+    mockSupabase = createMockSupabaseClient()
+    createServerSupabaseClient.mockResolvedValue(mockSupabase)
+  })
+
+  afterEach(() => {
+    jest.clearAllMocks()
+    mockSupabase.resetMocks()
+  })
+
+  describe('GET', () => {
+    it('returns 401 when user is not authenticated', async () => {
+      mockSupabase.auth.mockUser(null)
+      // ... test implementation
+    })
+
+    it('successfully fetches resource', async () => {
+      mockSupabase.auth.mockUser(createMockUser())
+      mockSupabase.mockTable('table_name').mockResolvedValue(mockData)
+      // ... test implementation
+    })
+  })
+})
+```
+
+### Mock Configuration Pattern
+
+**Critical**: Configure mocks BEFORE the API route executes:
+
+```typescript
+// ✅ CORRECT - Pre-configure table response
+mockSupabase.mockTable('playlists').mockResolvedValue(mockPlaylist)
+
+const response = await GET(request, { params })
+
+// ❌ WRONG - Too late, route already executed
+const response = await GET(request, { params })
+mockSupabase.mockTable('playlists').mockResolvedValue(mockPlaylist)
+```
+
+### Error Response Assertions
+
+FocusTracks uses this error format: `{ error: string, message?: string, code?: string }`
+
+```typescript
+expectErrorResponse(result, 401, {
+  message: 'You must be logged in to view playlists',
+  code: 'UNAUTHORIZED'
+})
+```
+
+### Coverage Standards
+
+- **API Routes**: 70%+ coverage (auth, validation, error handling, success paths)
+- **Utility Functions**: 90%+ coverage
+- **Components**: 80%+ coverage
+
+**Current Status**: 158 tests passing, including 15 API route integration tests for `/api/playlists/[id]`
+
+**Reference Files**:
+- `src/app/api/playlists/[id]/__tests__/route.test.ts` - Complete API route test example
+- `src/__tests__/helpers/supabase-mock.ts` - Mock implementation details
+
+---
+
+## Production Monitoring
+
+### Sentry Error Tracking
+
+**What**: Automatic error capture and reporting for production debugging
+
+**Setup**: See `docs/MONITORING_SETUP.md` for complete configuration guide
+
+**Key Files**:
+- `sentry.client.config.ts` - Browser error tracking
+- `sentry.server.config.ts` - Server-side error tracking
+- `sentry.edge.config.ts` - Middleware error tracking
+- `instrumentation.ts` - Early initialization hook
+
+**Environment Variables Required**:
+```bash
+NEXT_PUBLIC_SENTRY_DSN=https://...@sentry.io/...
+SENTRY_ORG=your-org-slug
+SENTRY_PROJECT=your-project-slug
+SENTRY_AUTH_TOKEN=your-auth-token
+```
+
+**What Gets Tracked**:
+- Unhandled JavaScript errors (client-side)
+- API route exceptions (server-side)
+- React component errors (via ErrorBoundary)
+- Performance issues and slow transactions
+- User context for authenticated users
+
+**Integration Points**:
+- `src/components/ErrorBoundary.tsx` - Captures React errors and sends to Sentry
+- `next.config.ts` - Webpack plugin for source map uploads
+
+**Free Tier**: 5,000 events/month
+
+### Vercel Analytics & Speed Insights
+
+**What**: User behavior tracking and Core Web Vitals monitoring
+
+**Setup**: Automatically enabled on Vercel deployments (no env vars needed)
+
+**Key Files**:
+- `src/app/layout.tsx` - Analytics and SpeedInsights components
+
+**What Gets Tracked**:
+- **Analytics**: Page views, traffic sources, user demographics
+- **Speed Insights**: LCP, FID, CLS, TTFB (Core Web Vitals)
+
+**Viewing Data**:
+- Vercel Dashboard → Analytics tab
+- Vercel Dashboard → Speed Insights tab
+- Real-time data with ~5-10 minute delay
+
+**Free Tier**: 50,000 events/month
+
+### Monitoring Best Practices
+
+1. **Meaningful Error Messages**: Use descriptive error messages for better Sentry grouping
+2. **User Context**: Set user context in authentication flow for debugging
+3. **Error Tags**: Categorize errors by feature/action
+4. **Performance Monitoring**: Track slow database queries and API calls
+5. **Alert Configuration**: Set up Sentry alerts for critical issues
+6. **Release Tracking**: Tag errors by deployment version
+
+**Reference Files**:
+- `docs/MONITORING_SETUP.md` - Complete setup and troubleshooting guide
+
+---
+
 ## Project Context
 
 This is a learning-focused project designed to demonstrate full-stack development skills. The codebase prioritizes clean architecture and proper TypeScript usage over complex features. Refer to `focustracks_PRD.md` for detailed product requirements and learning objectives.
