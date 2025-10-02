@@ -222,7 +222,7 @@ export const requestValidation = {
   validateOrigin: (request: NextRequest): boolean => {
     const origin = request.headers.get('origin')
     const referer = request.headers.get('referer')
-    
+
     if (!origin && !referer) {
       return true // Allow requests without origin (e.g., direct API calls)
     }
@@ -230,17 +230,24 @@ export const requestValidation = {
     const allowedOrigins = [
       process.env.NEXT_PUBLIC_APP_URL,
       'http://localhost:3000',
-      'https://localhost:3000'
+      'https://localhost:3000',
+      // Allow Vercel preview and production deployments
+      ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : []),
+      // Allow any *.vercel.app domain for deployments
+      ...(origin && origin.includes('.vercel.app') ? [origin] : []),
     ].filter((url): url is string => Boolean(url))
 
     if (origin) {
-      return allowedOrigins.some(allowed => origin.startsWith(allowed))
+      // Check exact match or if origin is a Vercel deployment
+      const isVercelDomain = origin.includes('.vercel.app')
+      return allowedOrigins.some(allowed => origin.startsWith(allowed)) || isVercelDomain
     }
 
     if (referer) {
       try {
         const refererUrl = new URL(referer)
-        return allowedOrigins.some(allowed => refererUrl.origin === allowed)
+        const isVercelDomain = refererUrl.hostname.includes('.vercel.app')
+        return allowedOrigins.some(allowed => refererUrl.origin === allowed) || isVercelDomain
       } catch {
         return false
       }
