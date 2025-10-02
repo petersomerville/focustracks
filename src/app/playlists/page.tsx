@@ -8,6 +8,8 @@ import ErrorMessage from '@/components/ErrorMessage'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import { usePlaylists } from '@/hooks/usePlaylists'
 import { Plus, Music, Trash2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default function PlaylistsPage() {
   const router = useRouter()
@@ -47,58 +49,60 @@ export default function PlaylistsPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen bg-background">
         <Header />
-        
+
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">My Playlists</h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-2">Create and manage your music playlists</p>
+              <h1 className="text-3xl font-bold text-foreground">My Playlists</h1>
+              <p className="text-muted-foreground mt-2">Create and manage your music playlists</p>
             </div>
-            
-            <button
+
+            <Button
               onClick={() => setShowCreateForm(true)}
-              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
-              <Plus className="h-4 w-4" />
-              <span>New Playlist</span>
-            </button>
+              <Plus className="h-4 w-4 mr-2" />
+              New Playlist
+            </Button>
           </div>
 
           {/* Create Playlist Form */}
           {showCreateForm && (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-6 mb-8">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Create New Playlist</h3>
-              <form onSubmit={handleCreatePlaylist} className="flex items-center space-x-4">
-                <input
-                  type="text"
-                  value={newPlaylistName}
-                  onChange={(e) => setNewPlaylistName(e.target.value)}
-                  placeholder="Enter playlist name..."
-                  className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
-                  disabled={creating}
-                />
-                <button
-                  type="submit"
-                  disabled={creating || !newPlaylistName.trim()}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  {creating ? 'Creating...' : 'Create'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowCreateForm(false)
-                    setNewPlaylistName('')
-                  }}
-                  className="px-4 py-2 text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                >
-                  Cancel
-                </button>
-              </form>
-            </div>
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle>Create New Playlist</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleCreatePlaylist} className="flex items-center space-x-4">
+                  <input
+                    type="text"
+                    value={newPlaylistName}
+                    onChange={(e) => setNewPlaylistName(e.target.value)}
+                    placeholder="Enter playlist name..."
+                    className="flex-1 px-3 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent text-foreground placeholder-muted-foreground"
+                    disabled={creating}
+                  />
+                  <Button
+                    type="submit"
+                    disabled={creating || !newPlaylistName.trim()}
+                  >
+                    {creating ? 'Creating...' : 'Create'}
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      setShowCreateForm(false)
+                      setNewPlaylistName('')
+                    }}
+                    variant="outline"
+                  >
+                    Cancel
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
           )}
 
           {/* Loading State */}
@@ -124,57 +128,62 @@ export default function PlaylistsPage() {
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {playlists && playlists.length > 0 ? (
                 playlists.map((playlist) => (
-                  <div key={playlist.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-6 hover:shadow-md transition-shadow">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-3 mb-3">
-                          <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                            <Music className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  <Card key={playlist.id} className="hover:shadow-md transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3 mb-3">
+                            <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                              <Music className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                            </div>
+                            <h3 className="text-lg font-medium text-foreground truncate">
+                              {playlist.name}
+                            </h3>
                           </div>
-                          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 truncate">
-                            {playlist.name}
-                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            Created {new Date(playlist.created_at).toLocaleDateString()}
+                          </p>
                         </div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          Created {new Date(playlist.created_at).toLocaleDateString()}
-                        </p>
+
+                        <Button
+                          onClick={() => handleDeletePlaylist(playlist.id)}
+                          disabled={deleting === playlist.id}
+                          variant="ghost"
+                          size="icon"
+                          className="text-muted-foreground hover:text-destructive"
+                          title="Delete playlist"
+                        >
+                          {deleting === playlist.id ? (
+                            <div className="h-4 w-4 border-2 border-destructive border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
+                        </Button>
                       </div>
 
-                      <button
-                        onClick={() => handleDeletePlaylist(playlist.id)}
-                        disabled={deleting === playlist.id}
-                        className="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors disabled:opacity-50"
-                        title="Delete playlist"
-                      >
-                        {deleting === playlist.id ? (
-                          <div className="h-4 w-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                          <Trash2 className="h-4 w-4" />
-                        )}
-                      </button>
-                    </div>
-
-                    <div className="mt-4 pt-4 border-t dark:border-gray-700">
-                      <button
-                        onClick={() => router.push(`/playlists/${playlist.id}`)}
-                        className="w-full px-3 py-2 text-sm text-blue-600 dark:text-blue-400 border border-blue-600 dark:border-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900 transition-colors"
-                      >
-                        View Playlist
-                      </button>
-                    </div>
-                  </div>
+                      <div className="mt-4 pt-4 border-t border-border">
+                        <Button
+                          onClick={() => router.push(`/playlists/${playlist.id}`)}
+                          variant="outline"
+                          className="w-full"
+                          size="sm"
+                        >
+                          View Playlist
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
                 ))
               ) : (
                 <div className="col-span-full text-center py-12">
-                  <Music className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No playlists yet</h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-4">Create your first playlist to get started</p>
-                  <button
+                  <Music className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-foreground mb-2">No playlists yet</h3>
+                  <p className="text-muted-foreground mb-4">Create your first playlist to get started</p>
+                  <Button
                     onClick={() => setShowCreateForm(true)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                   >
                     Create Playlist
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>

@@ -51,21 +51,28 @@ export default function Header({ onSearch }: HeaderProps) {
             {user ? (
               <div className="flex items-center space-x-1">
                 <TrackSubmissionForm compact />
-                <Link
-                  href="/playlists"
-                  className="p-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+                <Button
+                  asChild
+                  variant="ghost"
+                  size="icon"
                   title="Playlists"
                 >
-                  <List className="h-5 w-5" />
-                </Link>
+                  <Link href="/playlists">
+                    <List className="h-5 w-5" />
+                  </Link>
+                </Button>
                 {userRole === 'admin' && (
-                  <Link
-                    href="/admin"
-                    className="p-2 text-blue-700 dark:text-blue-300 hover:text-blue-900 dark:hover:text-blue-100 transition-colors"
+                  <Button
+                    asChild
+                    variant="ghost"
+                    size="icon"
+                    className="text-blue-700 dark:text-blue-300 hover:text-blue-900 dark:hover:text-blue-100"
                     title="Admin"
                   >
-                    <Settings className="h-5 w-5" />
-                  </Link>
+                    <Link href="/admin">
+                      <Settings className="h-5 w-5" />
+                    </Link>
+                  </Button>
                 )}
                 <Button
                   onClick={handleSignOut}
@@ -117,33 +124,43 @@ export default function Header({ onSearch }: HeaderProps) {
             {user ? (
               <div className="flex items-center space-x-2">
                 <TrackSubmissionForm />
-                <Link
-                  href="/playlists"
-                  className="flex items-center space-x-1 px-3 py-1 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
                 >
-                  <List className="h-4 w-4" />
-                  <span>Playlists</span>
-                </Link>
-                <Link
-                  href="/profile"
-                  className="flex items-center space-x-1 px-3 py-1 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  <Link href="/playlists" className="flex items-center space-x-1">
+                    <List className="h-4 w-4" />
+                    <span>Playlists</span>
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
                   title="Profile"
                 >
-                  <User className="h-4 w-4" />
-                  <span className="hidden lg:inline">Profile</span>
-                </Link>
-                {userRole === 'admin' && (
-                  <Link
-                    href="/admin"
-                    className="flex items-center space-x-1 px-3 py-1 text-sm text-blue-700 dark:text-blue-300 hover:text-blue-900 dark:hover:text-blue-100 border border-blue-300 dark:border-blue-600 rounded-md hover:bg-blue-50 dark:hover:bg-blue-800 transition-colors"
-                  >
-                    <Settings className="h-4 w-4" />
-                    <span>Admin</span>
+                  <Link href="/profile" className="flex items-center space-x-1">
+                    <User className="h-4 w-4" />
+                    <span className="hidden lg:inline">Profile</span>
                   </Link>
+                </Button>
+                {userRole === 'admin' && (
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="sm"
+                    className="border-blue-300 dark:border-blue-600 text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900"
+                  >
+                    <Link href="/admin" className="flex items-center space-x-1">
+                      <Settings className="h-4 w-4" />
+                      <span>Admin</span>
+                    </Link>
+                  </Button>
                 )}
                 <div className="flex items-center space-x-2">
-                  <User className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                  <span className="text-sm text-gray-700 dark:text-gray-300 hidden lg:inline">{user.email}</span>
+                  <User className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground hidden lg:inline">{user.email}</span>
                 </div>
                 <Button
                   onClick={handleSignOut}
