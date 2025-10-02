@@ -39,7 +39,8 @@ export default function PlaylistSelectionModal({
     } finally {
       setLoading(false)
     }
-  }, [logger])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     if (isOpen) {
