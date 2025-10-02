@@ -283,7 +283,7 @@ export default function AdminDashboard() {
                 </div>
 
                 {submission.admin_notes && (
-                  <div className="bg-gray-50 p-3 rounded-md">
+                  <div className="bg-muted/50 p-3 rounded-md">
                     <strong>Admin Notes:</strong>
                     <p className="text-muted-foreground mt-1">{submission.admin_notes}</p>
                   </div>

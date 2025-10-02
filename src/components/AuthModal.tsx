@@ -235,7 +235,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
         </form>
 
         {/* Footer */}
-        <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600 rounded-b-lg">
+        <div className="px-6 py-4 bg-muted/30 border-t border-border rounded-b-lg">
           <p className="text-center text-sm text-gray-600 dark:text-gray-400">
             {mode === 'login' ? "Don't have an account? " : "Already have an account? "}
             <button
