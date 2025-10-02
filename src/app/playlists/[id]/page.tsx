@@ -6,9 +6,13 @@ import Header from '@/components/Header'
 import ProtectedRoute from '@/components/ProtectedRoute'
 import TrackCard from '@/components/TrackCard'
 import YouTubePlayer from '@/components/YouTubePlayer'
+import LoadingSpinner from '@/components/LoadingSpinner'
+import ErrorMessage from '@/components/ErrorMessage'
 import { Track, Playlist } from '@/lib/supabase'
 import { ArrowLeft, Trash2, Music, Repeat } from 'lucide-react'
 import { createLogger } from '@/lib/logger'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 
 export default function PlaylistDetailPage() {
   const logger = createLogger('PlaylistDetailPage')
@@ -144,31 +148,35 @@ export default function PlaylistDetailPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen bg-background">
         <Header />
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Back Button */}
-          <button
+          <Button
             onClick={() => router.push('/playlists')}
-            className="flex items-center space-x-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 mb-6 transition-colors"
+            variant="ghost"
+            className="mb-6 -ml-2"
           >
-            <ArrowLeft className="h-4 w-4" />
-            <span>Back to Playlists</span>
-          </button>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Playlists
+          </Button>
 
           {/* Loading State */}
           {loading && (
-            <div className="text-center py-8">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <p className="mt-2 text-gray-600 dark:text-gray-400">Loading playlist...</p>
+            <div className="py-12">
+              <LoadingSpinner size="lg" text="Loading playlist..." />
             </div>
           )}
 
           {/* Error State */}
           {error && (
-            <div className="text-center py-8">
-              <p className="text-red-600 dark:text-red-400">Error: {error}</p>
+            <div className="py-8">
+              <ErrorMessage
+                title="Failed to load playlist"
+                message={error}
+                variant="error"
+              />
             </div>
           )}
 
@@ -176,59 +184,59 @@ export default function PlaylistDetailPage() {
           {!loading && !error && playlist && (
             <>
               {/* Playlist Header */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-6 mb-8">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                      <Music className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+              <Card className="mb-8">
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                        <Music className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div>
+                        <h1 className="text-3xl font-bold text-foreground">
+                          {playlist.name}
+                        </h1>
+                        <p className="text-muted-foreground mt-1">
+                          {playlist.tracks?.length || 0} {(playlist.tracks?.length || 0) === 1 ? 'track' : 'tracks'}
+                        </p>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Created {new Date(playlist.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                        {playlist.name}
-                      </h1>
-                      <p className="text-gray-600 dark:text-gray-400 mt-1">
-                        {playlist.tracks?.length || 0} {(playlist.tracks?.length || 0) === 1 ? 'track' : 'tracks'}
-                      </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
-                        Created {new Date(playlist.created_at).toLocaleDateString()}
-                      </p>
-                    </div>
+
+                    {/* Playlist Mode Toggle */}
+                    {playlist.tracks && playlist.tracks.length > 0 && (
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm text-muted-foreground">Playback:</span>
+                        <Button
+                          onClick={() => setPlaylistMode(playlistMode === 'single' ? 'sequential' : 'single')}
+                          variant={playlistMode === 'sequential' ? 'default' : 'outline'}
+                          size="sm"
+                          className="rounded-full"
+                          title={playlistMode === 'single' ? 'Switch to sequential playback' : 'Switch to single track playback'}
+                        >
+                          {playlistMode === 'sequential' ? (
+                            <>
+                              <Repeat className="h-4 w-4 mr-1" />
+                              Sequential
+                            </>
+                          ) : (
+                            <>
+                              <Music className="h-4 w-4 mr-1" />
+                              Single
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    )}
                   </div>
-                  
-                  {/* Playlist Mode Toggle */}
-                  {playlist.tracks && playlist.tracks.length > 0 && (
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Playback:</span>
-                      <button
-                        onClick={() => setPlaylistMode(playlistMode === 'single' ? 'sequential' : 'single')}
-                        className={`flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                          playlistMode === 'sequential'
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-                        }`}
-                        title={playlistMode === 'single' ? 'Switch to sequential playback' : 'Switch to single track playback'}
-                      >
-                        {playlistMode === 'sequential' ? (
-                          <>
-                            <Repeat className="h-4 w-4" />
-                            <span>Sequential</span>
-                          </>
-                        ) : (
-                          <>
-                            <Music className="h-4 w-4" />
-                            <span>Single</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
+                </CardContent>
+              </Card>
 
               {/* Tracks List */}
               {playlist.tracks && playlist.tracks.length > 0 ? (
                 <div className="space-y-4">
-                  <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                  <h2 className="text-xl font-semibold text-foreground mb-4">
                     Tracks
                   </h2>
                   {playlist.tracks.map((track) => (
@@ -240,36 +248,35 @@ export default function PlaylistDetailPage() {
                         onPause={handlePause}
                       />
                       {/* Remove from Playlist Button */}
-                      <button
+                      <Button
                         onClick={() => handleRemoveTrack(track.id)}
                         disabled={deletingTrack === track.id}
-                        className="absolute top-4 right-4 p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors disabled:opacity-50"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute top-4 right-4 text-muted-foreground hover:text-destructive"
                         title="Remove from playlist"
                       >
                         {deletingTrack === track.id ? (
-                          <div className="h-4 w-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                          <div className="h-4 w-4 border-2 border-destructive border-t-transparent rounded-full animate-spin" />
                         ) : (
                           <Trash2 className="h-4 w-4" />
                         )}
-                      </button>
+                      </Button>
                     </div>
                   ))}
                 </div>
               ) : (
                 <div className="text-center py-12">
-                  <Music className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                  <Music className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-foreground mb-2">
                     No tracks in this playlist
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  <p className="text-muted-foreground mb-4">
                     Add tracks to this playlist from the main music page
                   </p>
-                  <button
-                    onClick={() => router.push('/')}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  >
+                  <Button onClick={() => router.push('/')}>
                     Browse Tracks
-                  </button>
+                  </Button>
                 </div>
               )}
             </>
