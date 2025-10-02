@@ -16,7 +16,8 @@
       "Bash(npm test:*)",
       "Bash(cat:*)",
       "Bash(npm run data:validate:*)",
-      "Bash(npm run test:*)"
+      "Bash(npm run test:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []
