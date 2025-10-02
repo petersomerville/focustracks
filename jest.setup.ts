@@ -2,8 +2,10 @@ import '@testing-library/jest-dom'
 import { TextEncoder, TextDecoder } from 'util'
 
 // Polyfill Web APIs for Next.js API routes testing
+// @ts-expect-error - Node.js TextEncoder/TextDecoder types don't exactly match global types
 global.TextEncoder = TextEncoder
-global.TextDecoder = TextDecoder as typeof global.TextDecoder
+// @ts-expect-error - Node.js TextEncoder/TextDecoder types don't exactly match global types
+global.TextDecoder = TextDecoder
 
 // Mock Next.js router
 jest.mock('next/navigation', () => ({

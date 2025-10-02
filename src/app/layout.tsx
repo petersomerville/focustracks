@@ -5,6 +5,13 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { Toaster } from "@/components/ui/sonner";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+
+// Initialize Sentry on the client
+if (typeof window !== 'undefined') {
+  import('../../sentry.client.config');
+}
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -55,6 +62,8 @@ export default function RootLayout({
             <AuthProvider>
               {children}
               <Toaster />
+              <Analytics />
+              <SpeedInsights />
             </AuthProvider>
           </ThemeProvider>
         </ErrorBoundary>
