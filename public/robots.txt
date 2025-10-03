@@ -1,0 +1,15 @@
+# robots.txt for FocusTracks
+# Controls how search engines crawl the site
+
+# Allow all search engines to crawl everything except sensitive routes
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /profile
+
+# Sitemap location for search engines
+Sitemap: https://focustracks-ochre.vercel.app/sitemap.xml
+
+# Crawl delay (optional - helps prevent server overload)
+# Crawl-delay: 1

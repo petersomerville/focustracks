@@ -22,6 +22,49 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "FocusTracks - Music for Focus & Productivity",
   description: "Discover and share music that enhances focus and productivity for work and study",
+  keywords: ["focus music", "productivity music", "study music", "ambient music", "concentration music", "work music", "background music"],
+  authors: [{ name: "FocusTracks" }],
+  creator: "FocusTracks",
+  publisher: "FocusTracks",
+  metadataBase: new URL('https://focustracks-ochre.vercel.app'),
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://focustracks-ochre.vercel.app',
+    siteName: 'FocusTracks',
+    title: 'FocusTracks - Music for Focus & Productivity',
+    description: 'Discover curated focus music tracks designed to enhance your concentration during work and study. Browse ambient, classical, and electronic music.',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'FocusTracks - Music for Focus & Productivity',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    site: '@focustracks',
+    creator: '@focustracks',
+    title: 'FocusTracks - Music for Focus & Productivity',
+    description: 'Discover curated focus music for work and study. Browse ambient, classical, and electronic tracks.',
+    images: ['/twitter-image.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: 'google-site-verification-code', // Add your verification code when you have it
+  },
 };
 
 export default function RootLayout({
@@ -32,6 +75,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Theme script - must run before body renders */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -47,6 +91,39 @@ export default function RootLayout({
                 document.documentElement.classList.add('light');
               }
             `,
+          }}
+        />
+
+        {/* Structured Data (JSON-LD) for search engines */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'WebApplication',
+              name: 'FocusTracks',
+              description: 'Discover and share music that enhances focus and productivity for work and study',
+              url: 'https://focustracks-ochre.vercel.app',
+              applicationCategory: 'MusicApplication',
+              operatingSystem: 'Web Browser',
+              offers: {
+                '@type': 'Offer',
+                price: '0',
+                priceCurrency: 'USD',
+              },
+              creator: {
+                '@type': 'Organization',
+                name: 'FocusTracks',
+              },
+              potentialAction: {
+                '@type': 'SearchAction',
+                target: {
+                  '@type': 'EntryPoint',
+                  urlTemplate: 'https://focustracks-ochre.vercel.app/?search={search_term_string}',
+                },
+                'query-input': 'required name=search_term_string',
+              },
+            }),
           }}
         />
       </head>
