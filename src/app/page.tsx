@@ -128,7 +128,11 @@ export default function Home() {
 
         {/* Tracks Grid */}
         {!loading && !error && (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div>
+            <h2 className="text-2xl font-semibold text-foreground mb-6">
+              {selectedGenre === 'All' ? 'All Tracks' : `${selectedGenre} Tracks`}
+            </h2>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {tracks && tracks.length > 0 ? (
               tracks.map((track) => (
                 <TrackCard
@@ -145,6 +149,7 @@ export default function Home() {
                 <p className="text-muted-foreground">No tracks found matching your criteria.</p>
               </div>
             )}
+            </div>
           </div>
         )}
       </main>
