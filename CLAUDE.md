@@ -21,6 +21,11 @@ FocusTracks is a music discovery and playlist application built as a technical l
 Ensure these environment variables are configured:
 - `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anonymous key
+- `SUPABASE_SERVICE_ROLE_KEY` - For admin operations (bypasses RLS)
+- `NEXT_PUBLIC_SENTRY_DSN` - Sentry error tracking (production monitoring)
+- `SENTRY_ORG` - Sentry organization slug
+- `SENTRY_PROJECT` - Sentry project slug
+- `SENTRY_AUTH_TOKEN` - For source map uploads
 
 ## Architecture Overview
 

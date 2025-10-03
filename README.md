@@ -23,16 +23,32 @@ A modern music discovery and playlist application built with Next.js 15, React 1
 
 ## 🛠️ Technology Stack
 
-- **Frontend**: React 19.1, Next.js 15.5, TypeScript 5
-- **Styling**: Tailwind CSS v4 with dark mode support
+### Core Technologies
+- **Frontend**: React 19.1, Next.js 15.5 (App Router + Turbopack), TypeScript 5
+- **Styling**: Tailwind CSS v4 with CSS-based config (`@variant` syntax)
 - **Backend**: Next.js API Routes with server-side rendering
 - **Database**: Supabase (PostgreSQL) with Row Level Security (RLS)
 - **Authentication**: Supabase Auth with role-based access control (user/admin)
 - **Validation**: Zod schemas for type-safe API validation
 - **Music Integration**: YouTube Iframe API for embedded playback
-- **Testing**: Jest 30 with React Testing Library (142 tests, 90%+ coverage)
+
+### Testing & Quality
+- **Testing**: Jest 30 with React Testing Library (158 tests, 70-90% coverage)
+- **API Testing**: Mock Supabase infrastructure for integration tests
+- **Accessibility**: ARIA labels, keyboard navigation, screen reader support
+- **Linting**: ESLint with Next.js config
+
+### Production Monitoring
+- **Error Tracking**: Sentry (client + server + edge runtime)
+- **Session Replay**: Sentry Replay (10% always, 100% on errors)
+- **Analytics**: Vercel Analytics for user behavior tracking
+- **Performance**: Vercel Speed Insights (Core Web Vitals)
+
+### Security & Infrastructure
+- **Security**: CSP headers, rate limiting, input sanitization, XSS protection
 - **Logging**: Winston-style structured logging
 - **Deployment**: Vercel with automatic deployments
+- **CI/CD**: GitHub Actions with pre-commit hooks
 
 ## 🚀 Getting Started
 
@@ -62,12 +78,21 @@ A modern music discovery and playlist application built with Next.js 15, React 1
    Create a `.env.local` file in the root directory:
 
    ```env
+   # Supabase
    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
    SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
+   # Sentry (optional - for error tracking)
+   NEXT_PUBLIC_SENTRY_DSN=your_sentry_dsn
+   SENTRY_ORG=your_sentry_org
+   SENTRY_PROJECT=your_sentry_project
+   SENTRY_AUTH_TOKEN=your_auth_token
    ```
 
-   > **Note**: The service role key is required for admin operations. See `docs/ADRs/001-service-role-pattern.md` for details.
+   > **Note**:
+   > - Service role key is required for admin operations. See `docs/ADRs/001-service-role-pattern.md`
+   > - Sentry variables are optional but recommended for production monitoring. See `docs/MONITORING_SETUP.md`
 
 4. **Run the development server**
 
@@ -204,14 +229,26 @@ focustracks/
 
 ### ✅ Phase 5: Testing & Quality (Completed)
 
-- [x] Comprehensive unit test suite (90 tests)
-- [x] Component testing (52 tests)
-- [x] Accessibility testing
-- [x] Zod schema validation
+- [x] Comprehensive test suite (158 tests, 70-90% coverage)
+- [x] API integration tests with mock Supabase infrastructure
+- [x] Component testing with accessibility validation
+- [x] Zod schema validation for all API inputs
 - [x] Winston-style structured logging
+
+### ✅ Phase 6: Production Monitoring (Completed)
+
+- [x] Sentry error tracking (client + server + edge)
+- [x] Session replay for debugging (10% always, 100% on errors)
+- [x] Vercel Analytics for user behavior tracking
+- [x] Vercel Speed Insights for Core Web Vitals
+- [x] Content Security Policy (CSP) configuration
+- [x] Source maps for production debugging
 
 ### 🔮 Future Enhancements
 
+- [ ] Performance optimization (caching, code splitting)
+- [ ] SEO optimization (metadata, sitemap, structured data)
+- [ ] Accessibility audit (WCAG 2.1 compliance)
 - [ ] End-to-end testing with Playwright
 - [ ] Advanced playlist features (collaborative playlists, sharing)
 - [ ] Social features (likes, comments, user profiles)
@@ -220,19 +257,24 @@ focustracks/
 
 ## 📚 Documentation
 
-- **`CLAUDE.md`** - Comprehensive guide for AI-assisted development
-- **`docs/ADRs/`** - Architectural Decision Records documenting key technical decisions
-- **`docs/migrations/`** - Database migration history and schema documentation
-- **`.github/PULL_REQUEST_TEMPLATE.md`** - PR quality checklist
+- **[`docs/FOCUSTRACKS_PROJECT_OVERVIEW.md`](docs/FOCUSTRACKS_PROJECT_OVERVIEW.md)** - Complete project overview with learning resources
+- **[`CLAUDE.md`](CLAUDE.md)** - Comprehensive guide for AI-assisted development
+- **[`docs/MONITORING_SETUP.md`](docs/MONITORING_SETUP.md)** - Sentry and analytics setup guide
+- **[`docs/ADRs/`](docs/ADRs/)** - Architectural Decision Records documenting key technical decisions
+- **[`docs/migrations/`](docs/migrations/)** - Database migration history and schema documentation
+- **[`.github/PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md)** - PR quality checklist
 
 ## ✅ Code Quality
 
-- **142 Tests Passing**: 90 unit tests + 52 component tests
-- **90%+ Coverage**: Utilities, schemas, and critical components
+- **158 Tests Passing**: Comprehensive coverage across all layers
+  - 70%+ API route integration tests
+  - 80%+ component tests
+  - 90%+ utility and schema tests
 - **Zero Linter Errors**: ESLint compliance across entire codebase
 - **100% TypeScript**: Full type safety with strict mode enabled
 - **Accessibility First**: ARIA labels, keyboard navigation, screen reader support
-- **Security**: Row Level Security, service role pattern, Zod validation
+- **Security Hardened**: CSP, rate limiting, RLS, input validation, XSS protection
+- **Production Observable**: Full error tracking, analytics, and performance monitoring
 
 ## 🤝 Contributing
 
