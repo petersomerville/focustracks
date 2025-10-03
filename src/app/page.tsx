@@ -1,16 +1,18 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, lazy, Suspense } from 'react'
 import Header from '@/components/Header'
 import TrackCard from '@/components/TrackCard'
-import YouTubePlayer from '@/components/YouTubePlayer'
-import PlaylistSelectionModal from '@/components/PlaylistSelectionModal'
 import ErrorMessage from '@/components/ErrorMessage'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import { Button } from '@/components/ui/button'
 import { Track } from '@/lib/supabase'
 import { useTracks } from '@/hooks/useTracks'
 import { toast } from 'sonner'
+
+// Lazy load heavy components that aren't needed immediately
+const YouTubePlayer = lazy(() => import('@/components/YouTubePlayer'))
+const PlaylistSelectionModal = lazy(() => import('@/components/PlaylistSelectionModal'))
 
 export default function Home() {
   const [selectedGenre, setSelectedGenre] = useState('All')
@@ -154,27 +156,33 @@ export default function Home() {
         )}
       </main>
 
-      {/* YouTube Player */}
+      {/* YouTube Player - Lazy loaded */}
       {currentTrack && (
-        <YouTubePlayer
-          track={currentTrack}
-          isPlaying={isPlaying}
-          onPlay={handleResume}
-          onPause={handlePause}
-          onSkipBack={handleSkipBack}
-          onSkipForward={handleSkipForward}
-          onVolumeChange={handleVolumeChange}
-          volume={volume}
-        />
+        <Suspense fallback={<div className="fixed bottom-0 left-0 right-0 h-24 bg-card border-t border-border" />}>
+          <YouTubePlayer
+            track={currentTrack}
+            isPlaying={isPlaying}
+            onPlay={handleResume}
+            onPause={handlePause}
+            onSkipBack={handleSkipBack}
+            onSkipForward={handleSkipForward}
+            onVolumeChange={handleVolumeChange}
+            volume={volume}
+          />
+        </Suspense>
       )}
 
-      {/* Playlist Selection Modal */}
-      <PlaylistSelectionModal
-        isOpen={playlistModalOpen}
-        track={trackToAdd}
-        onClose={handlePlaylistModalClose}
-        onSuccess={handlePlaylistAddSuccess}
-      />
+      {/* Playlist Selection Modal - Lazy loaded */}
+      {playlistModalOpen && (
+        <Suspense fallback={null}>
+          <PlaylistSelectionModal
+            isOpen={playlistModalOpen}
+            track={trackToAdd}
+            onClose={handlePlaylistModalClose}
+            onSuccess={handlePlaylistAddSuccess}
+          />
+        </Suspense>
+      )}
     </div>
   )
 }

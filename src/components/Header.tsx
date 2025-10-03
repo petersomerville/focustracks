@@ -2,12 +2,14 @@
 
 import { Music, Search, User, LogOut, List, Settings } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
-import { useState } from 'react'
-import AuthModal from './AuthModal'
+import { useState, lazy, Suspense } from 'react'
 import ThemeToggle from './ThemeToggle'
-import TrackSubmissionForm from './TrackSubmissionForm'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+
+// Lazy load modals/forms that aren't needed immediately
+const AuthModal = lazy(() => import('./AuthModal'))
+const TrackSubmissionForm = lazy(() => import('./TrackSubmissionForm'))
 
 interface HeaderProps {
   onSearch?: (query: string) => void
@@ -50,7 +52,9 @@ export default function Header({ onSearch }: HeaderProps) {
             <ThemeToggle />
             {user ? (
               <div className="flex items-center space-x-1">
-                <TrackSubmissionForm compact />
+                <Suspense fallback={<div className="w-10 h-10" />}>
+                  <TrackSubmissionForm compact />
+                </Suspense>
                 <Button
                   asChild
                   variant="ghost"
@@ -123,7 +127,9 @@ export default function Header({ onSearch }: HeaderProps) {
             
             {user ? (
               <div className="flex items-center space-x-2">
-                <TrackSubmissionForm />
+                <Suspense fallback={<div className="w-32 h-10" />}>
+                  <TrackSubmissionForm />
+                </Suspense>
                 <Button
                   asChild
                   variant="outline"
@@ -206,12 +212,16 @@ export default function Header({ onSearch }: HeaderProps) {
         </div>
       </div>
 
-      {/* Auth Modal */}
-      <AuthModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        initialMode={authMode}
-      />
+      {/* Auth Modal - Lazy loaded */}
+      {showAuthModal && (
+        <Suspense fallback={null}>
+          <AuthModal
+            isOpen={showAuthModal}
+            onClose={() => setShowAuthModal(false)}
+            initialMode={authMode}
+          />
+        </Suspense>
+      )}
     </header>
   )
 }
