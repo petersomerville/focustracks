@@ -1,7 +1,7 @@
 'use client'
 
 import { AlertCircle, X } from 'lucide-react'
-import { useState } from 'react'
+import { useState, memo } from 'react'
 
 interface ErrorMessageProps {
   title?: string
@@ -11,7 +11,7 @@ interface ErrorMessageProps {
   className?: string
 }
 
-export default function ErrorMessage({
+const ErrorMessage = memo(function ErrorMessage({
   title = 'Error',
   message,
   onDismiss,
@@ -73,4 +73,6 @@ export default function ErrorMessage({
       </div>
     </div>
   )
-}
+})
+
+export default ErrorMessage

@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import { Loader2 } from 'lucide-react'
 
 interface LoadingSpinnerProps {
@@ -8,7 +9,7 @@ interface LoadingSpinnerProps {
   className?: string
 }
 
-export default function LoadingSpinner({ 
+const LoadingSpinner = memo(function LoadingSpinner({ 
   size = 'md', 
   text, 
   className = '' 
@@ -27,4 +28,6 @@ export default function LoadingSpinner({
       )}
     </div>
   )
-}
+})
+
+export default LoadingSpinner
